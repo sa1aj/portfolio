@@ -1,33 +1,45 @@
 /* Hero line field.
- * - Thin vertical lines wave gently on their own.
+ * - Dense, faint vertical lines meander like contour lines. Their shape comes from
+ *   a smooth "flow field": five sine waves at different sizes and angles, scaled
+ *   by a slowly drifting envelope, so neighbouring lines share bends but drift in
+ *   and out of step (bunching here, spreading there). All motion stays slow.
+ * - No-crossing guarantee: the field's sideways slope stays below ~0.55, and a
+ *   line's x is x0 + field(x0), so x always increases with x0 -> lines keep order.
  * - Around the cursor they bulge outward in a circular lens. The push is a smooth
  *   falloff, (1 - d^2)^2, applied sideways, so lines bend around an invisible
  *   sphere and never cross.
- * - An orange-to-teal glow sits under the cursor and tints the nearby lines.
- * - The lens eases after the cursor and relaxes when the cursor leaves the hero.
+ * - The lens is a strong, slightly tall oval; it eases after the cursor and
+ *   relaxes when the cursor leaves the hero. Lines stay white (no colour tint).
+ * - A soft purple orb rests behind the headline and follows the cursor on an
+ *   underdamped spring, fading a little while it follows.
  */
 (function () {
   "use strict";
 
   var hero = document.getElementById("top");
   var canvas = document.getElementById("hero-lines");
+  var orbEl = document.getElementById("hero-orb");
+  var titleEl = document.getElementById("hero-h");
   if (!hero || !canvas || !canvas.getContext) return;
   var ctx = canvas.getContext("2d");
 
   var reduceMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   var W = 0, H = 0, spacing = 30, step = 10;
-  var lineRGB = "255,255,255", lineAlpha = 0.3, glowK = 1;
+  var lineX = [];                  // resting x of each line
+  var lineRGB = "255,255,255", lineAlpha = 0.3;
   var t = 0, last = 0, running = false, rafId = 0, inView = true;
 
   var pointer = { x: 0, y: 0, inside: false };
   var lens = { x: 0, y: 0, s: 0 }; // eased position + strength (0..1)
+  var orb = { x: 0, y: 0, vx: 0, vy: 0, placed: false,
+              fade: 1 };    // opacity: 1 at rest, fainter while following
+  var home = { x: 0, y: 0 };       // orb resting spot: centre of the headline
 
   function readTheme() {
     var cs = getComputedStyle(document.documentElement);
     lineRGB = cs.getPropertyValue("--line-rgb").trim() || "255,255,255";
     lineAlpha = parseFloat(cs.getPropertyValue("--line-alpha")) || 0.3;
-    glowK = document.documentElement.dataset.theme === "light" ? 0.6 : 1;
   }
 
   function resize() {
@@ -38,8 +50,36 @@
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    spacing = W < 700 ? Math.max(24, W / 16) : Math.max(26, W / 60);
-    step = W < 700 ? 16 : 10;
+    // Dense like the reference; a little sparser on phones (fewer lines = cheaper).
+    spacing = W < 700 ? 18 : 16;
+    step = W < 700 ? 12 : 9;
+    lineX = [];
+    for (var xs = -spacing * 4; xs <= W + spacing * 4; xs += spacing) lineX.push(xs);
+    // Rest the orb on the headline's centre (falls back to the hero centre).
+    if (titleEl) {
+      var tr = titleEl.getBoundingClientRect();
+      home.x = tr.left - r.left + tr.width / 2;
+      home.y = tr.top - r.top + tr.height / 2;
+    } else { home.x = W / 2; home.y = H / 2; }
+    if (!orb.placed) { orb.x = home.x; orb.y = home.y; orb.placed = true; placeOrb(); }
+  }
+
+  // Sideways offset of the line that rests at x0, at height y and time t.
+  // Sum of |amplitude x x-frequency| ~= 0.48 (+ ~0.04 from the envelope) < 1, so lines never cross.
+  // Speeds (the t multipliers) are all <= 0.6, slower than the earlier 0.85.
+  function field(x0, y) {
+    var env = 0.55 + 0.45 * Math.sin(x0 * 0.0023 + y * 0.0017 - t * 0.15 + 0.7); // wavier here, calmer there
+    return 14 * Math.sin(x0 * 0.0035 + y * 0.006 + t * 0.22 + 2.3)              // big slow swell
+      + env * ( 10  * Math.sin( x0 * 0.011 + y * 0.016 + t * 0.30)
+              +  6  * Math.sin(-x0 * 0.019 + y * 0.029 - t * 0.42 + 1.7)
+              +  4  * Math.sin( x0 * 0.027 + y * 0.045 + t * 0.55 + 4.1)
+              + 2.4 * Math.sin(-x0 * 0.040 + y * 0.068 - t * 0.60 + 0.9));
+  }
+
+  function placeOrb() {
+    if (!orbEl) return;
+    orbEl.style.transform = "translate3d(" + orb.x.toFixed(1) + "px," + orb.y.toFixed(1) + "px,0)";
+    orbEl.style.opacity = orb.fade.toFixed(3);
   }
 
   // ---------- Input (mouse / pen) ----------
@@ -62,18 +102,17 @@
     ctx.clearRect(0, 0, W, H);
 
     var R = Math.min(Math.max(W, H) * 0.2, 320);
-    var wave = !reduceMQ.matches;
 
     ctx.beginPath();
-    for (var x0 = -spacing; x0 <= W + spacing; x0 += spacing) {
+    for (var li = 0; li < lineX.length; li++) {
+      var x0 = lineX[li];
       for (var y = -step; y <= H + step; y += step) {
-        var dx = 0;
-        if (wave) {
-          dx = 5 * Math.sin(y * 0.0058 + t * 0.85 + x0 * 0.0042)
-             + 2.4 * Math.sin(y * 0.0131 - t * 0.55 + x0 * 0.0107);
-        }
+        // t only advances while animating, so reduced motion gets one still (but wavy) frame.
+        var dx = field(x0, y);
         if (lens.s > 0.002) {
-          var ex = x0 - lens.x, ey = y - lens.y;
+          // Strong bulge (as in the earlier version); ey squashed a little -> slightly tall oval.
+          // Measured from the waved position, so the bulge keeps line order and they never cross.
+          var ex = x0 + dx - lens.x, ey = (y - lens.y) * 0.75;
           var d2 = (ex * ex + ey * ey) / (R * R);
           if (d2 < 1) { var f = 1 - d2; dx += ex * 0.9 * lens.s * f * f; }
         }
@@ -84,24 +123,6 @@
     ctx.strokeStyle = "rgba(" + lineRGB + "," + lineAlpha + ")";
     ctx.stroke();
 
-    if (lens.s > 0.01) {
-      // Re-stroke the same path with an orange -> teal radial gradient, so lines
-      // near the cursor light up in colour and fade back to white further out.
-      ctx.strokeStyle = gradient(lens.x, lens.y, R * 1.05, [[0, "255,160,50", 0.95 * lens.s], [0.42, "255,150,45", 0.9 * lens.s], [0.78, "45,212,191", 0.8 * lens.s], [1, "45,212,191", 0]]);
-      ctx.stroke();
-      // Soft glow behind the lines.
-      ctx.globalCompositeOperation = "destination-over";
-      var r = R * 1.2;
-      ctx.fillStyle = gradient(lens.x, lens.y, r, [[0, "255,140,30", 0.38 * lens.s * glowK], [0.55, "30,180,170", 0.15 * lens.s * glowK], [1, "30,180,170", 0]]);
-      ctx.fillRect(lens.x - r, lens.y - r, r * 2, r * 2);
-      ctx.globalCompositeOperation = "source-over";
-    }
-  }
-
-  function gradient(x, y, r, stops) {
-    var g = ctx.createRadialGradient(x, y, 0, x, y, r);
-    for (var i = 0; i < stops.length; i++) g.addColorStop(stops[i][0], "rgba(" + stops[i][1] + "," + stops[i][2] + ")");
-    return g;
   }
 
   // ---------- Loop ----------
@@ -114,6 +135,19 @@
     lens.x += (tx - lens.x) * 0.14 * k;
     lens.y += (ty - lens.y) * 0.14 * k;
     lens.s += ((pointer.inside ? 1 : 0) - lens.s) * (pointer.inside ? 0.08 : 0.04) * k;
+
+    // Orb spring, stepped at a fixed 60 Hz so it feels the same on 60/120 Hz screens.
+    var ox = pointer.inside ? pointer.x : home.x, oy = pointer.inside ? pointer.y : home.y;
+    var n = Math.max(1, Math.min(6, Math.round(dt / 16.7)));
+    for (var i = 0; i < n; i++) {
+      // stiffness 0.03, damping 0.84: ~14% overshoot, settles in about a second
+      orb.vx += (ox - orb.x) * 0.03;  orb.vy += (oy - orb.y) * 0.03;
+      orb.vx *= 0.84;                 orb.vy *= 0.84;
+      orb.x += orb.vx;                orb.y += orb.vy;
+    }
+    // Fainter while following; back to full strength once it rests.
+    orb.fade += ((pointer.inside ? 0.5 : 1) - orb.fade) * 0.05 * k;
+    placeOrb();
     draw();
     if (running) rafId = requestAnimationFrame(frame);
   }
@@ -125,8 +159,12 @@
   }
   function stop() { running = false; cancelAnimationFrame(rafId); }
 
-  // Reduced motion: one still frame of straight lines, redrawn only on resize/theme change.
-  function drawStatic() { lens.s = 0; draw(); }
+  // Reduced motion (or paused): still frame of straight lines, orb resting on the headline.
+  function drawStatic() {
+    lens.s = 0; draw();
+    orb.x = home.x; orb.y = home.y; orb.vx = orb.vy = 0;
+    orb.fade = 1; placeOrb();
+  }
 
   readTheme();
   resize();
@@ -144,6 +182,15 @@
       inView = entries[0].isIntersecting;
       inView ? start() : stop();
     }).observe(hero);
+  }
+
+  // Nav is see-through only at the very top of the page (lines fade under it);
+  // as soon as you scroll it turns solid, so the headline never slides behind the links.
+  var nav = document.getElementById("nav");
+  if (nav) {
+    var syncNav = function () { nav.classList.toggle("nav--clear", window.scrollY < 8); };
+    window.addEventListener("scroll", syncNav, { passive: true });
+    syncNav();
   }
   document.addEventListener("visibilitychange", function () { document.hidden ? stop() : start(); });
   if (reduceMQ.addEventListener) reduceMQ.addEventListener("change", function () {

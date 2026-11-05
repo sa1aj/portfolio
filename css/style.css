@@ -14,7 +14,7 @@
   --violet: #a78bfa;
   --grad: linear-gradient(90deg, #f6b800 0%, #8fd14f 60%, #2fcf86 100%);
   --line-rgb: 255, 255, 255;   /* hero line colour, read by js/hero.js */
-  --line-alpha: 0.3;
+  --line-alpha: 0.2;     /* dense lines -> fainter each */
 
   --term-bg: #0b0b0b;
   --term-text: #e8e6e3;
@@ -41,7 +41,7 @@
   --blue: #2563eb;
   --violet: #7c3aed;
   --line-rgb: 18, 18, 18;
-  --line-alpha: 0.22;
+  --line-alpha: 0.16;
   color-scheme: light;
 }
 
@@ -109,12 +109,18 @@ kbd {
 
 /* ============ Nav ============ */
 .nav {
+  --nav-h: 72px;
   position: sticky; top: 0; z-index: 30;
   display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem;
-  height: 72px; padding-inline: var(--pad);
+  height: var(--nav-h); padding-inline: var(--pad);
   background: var(--bg);
   border-bottom: 1px solid var(--border);
+  transition: background-color .3s ease, border-color .3s ease;
 }
+/* At the very top of the page (set by js/hero.js) the nav is see-through so the
+   lines run up under it and fade out, like the reference. It turns solid as soon
+   as you scroll. Without JS it simply stays solid. */
+.nav--clear { background-color: transparent; border-bottom-color: transparent; }
 .nav__logo {
   justify-self: start;
   font: 700 1.3rem var(--sans); letter-spacing: -.04em; text-decoration: none; color: var(--text);
@@ -136,7 +142,8 @@ kbd {
 .icon-btn--term[aria-expanded="true"] { background: var(--orange); color: #0a0a0a; }
 
 @media (max-width: 760px) {
-  .nav { grid-template-columns: auto 1fr auto; height: 60px; gap: .5rem; }
+  .nav { --nav-h: 60px; grid-template-columns: auto 1fr auto; gap: .5rem; }
+  .hero { --nav-h: 60px; }
   .nav nav { justify-self: center; }
   .nav__links { gap: .9rem; }
   .nav__links a { font-size: .6rem; letter-spacing: .1em; }
@@ -146,16 +153,51 @@ kbd {
 @media (max-width: 360px) { .nav__links li:last-child { display: none; } }
 
 /* ============ Hero (static) ============ */
+/* The hero slides up under the (sticky) nav so the line field fills the whole
+   first screen; padding-top keeps the content clear of the nav. */
 .hero {
+  --nav-h: 72px;
   position: relative;
-  min-height: calc(100vh - 72px); min-height: calc(100svh - 72px);
+  margin-top: calc(-1 * var(--nav-h));
+  min-height: 100vh; min-height: 100svh;
   display: grid; grid-template-rows: 1fr auto;
-  padding: 2rem var(--pad) clamp(1.5rem, 4vh, 2.75rem);
+  padding: calc(var(--nav-h) + 2rem) var(--pad) clamp(1.5rem, 4vh, 2.75rem);
   overflow: hidden;
 }
-/* Line field: behind the content and never catches clicks */
-.hero__lines { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+/* Line field: behind the content, never catches clicks, and fades out at the
+   top and bottom instead of ending in a hard edge. */
+.hero__lines {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 74%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 74%, transparent 100%);
+}
 .hero__center, .hero__bottom { position: relative; z-index: 1; }
+
+/* Orb: dark plum core fading into a pink-lavender haze, blurred, with film grain.
+   js/hero.js moves it; translate(-50%,-50%) centres it on that point.
+   Haze is toned down for now so white text stays readable; it gets paler once
+   the headline inverts over it. Lines are drawn on top of the orb. */
+.hero__orb {
+  position: absolute; left: 0; top: 0;
+  width: min(60vmin, 620px); aspect-ratio: 1; border-radius: 50%;
+  translate: -50% -50%;
+  pointer-events: none; will-change: transform, opacity;
+}
+.hero__glow {                /* blurred gradient layer */
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle,
+    #12080f 0%, #1d0d1c 18%, #351a31 32%, #5d3c59 46%,
+    rgba(150, 112, 145, .75) 58%, rgba(185, 150, 180, .4) 68%, rgba(185, 150, 180, 0) 80%);
+  filter: blur(26px);
+}
+.hero__grain {               /* sharp grain layer (not blurred) */
+  position: absolute; inset: 0; border-radius: 50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay; opacity: .6;
+  -webkit-mask-image: radial-gradient(circle, #000 30%, transparent 68%);
+          mask-image: radial-gradient(circle, #000 30%, transparent 68%);
+}
+:root[data-theme="light"] .hero__glow { opacity: .4; }  /* keep dark text readable (JS owns .hero__orb opacity) */
 .hero__center { align-self: center; text-align: center; }
 .hero__kicker { margin-bottom: 1.6rem; }
 .hero__title {
@@ -180,7 +222,6 @@ kbd {
   .pill { padding: .8rem 1.3rem; }
 }
 @media (max-width: 600px) {
-  .hero { min-height: calc(100svh - 60px); }
   .hero__title { font-size: 18vw; line-height: .9; }
 }
 
