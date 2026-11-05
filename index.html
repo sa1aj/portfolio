@@ -1,18 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Salah Yacoub | Cloud Security</title>
+  <title>Salah Yacoub | Secure by default.</title>
   <meta name="description" content="Salah Yacoub - CS junior at UCF focused on cloud security. Projects, skills, and a terminal mode with a hidden CTF.">
-  <meta name="theme-color" content="#0d0f12">
+  <meta name="theme-color" content="#070707">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <!-- ?v= forces browsers to fetch the new file instead of a cached old one -->
+  <link rel="stylesheet" href="css/style.css?v=2">
   <script>
     // Apply saved theme before paint to avoid a flash.
     (function () {
-      var t = localStorage.getItem("theme");
-      if (t) document.documentElement.dataset.theme = t;
+      try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
     })();
   </script>
 </head>
@@ -20,167 +23,127 @@
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="nav">
-    <div class="nav__inner">
-      <a class="nav__logo" href="#top" aria-label="Home">salah<span class="accent">.</span>sec</a>
-      <nav aria-label="Primary">
-        <ul class="nav__links">
-          <li><a href="#about">About</a></li>
-          <li><a href="#skills">Skills</a></li>
-          <li><a href="#projects">Projects</a></li>
-        </ul>
-      </nav>
-      <div class="nav__actions">
-        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle light/dark theme" title="Toggle theme">
-          <span aria-hidden="true">◐</span>
-        </button>
-        <button class="icon-btn icon-btn--term" id="term-toggle" type="button"
-                aria-controls="terminal" aria-expanded="false" title="Terminal mode ( ` )">
-          <span aria-hidden="true">&gt;_</span><span class="sr-only">Open terminal mode</span>
-        </button>
-      </div>
+    <a class="nav__logo" href="#top" aria-label="Salah Yacoub, home">SY</a>
+    <nav aria-label="Primary">
+      <ul class="nav__links">
+        <li><a href="#projects">Work</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav__actions">
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle light/dark theme" title="Toggle theme">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="icon-btn icon-btn--term" id="term-toggle" type="button"
+              aria-controls="terminal" aria-expanded="false" title="Terminal mode ( ` )">
+        <span aria-hidden="true">&gt;_</span><span class="sr-only">Open terminal mode</span>
+      </button>
+      <!-- TODO: add assets/resume.pdf -->
+      <a class="pill pill--sm nav__resume" href="assets/resume.pdf" download><span aria-hidden="true">&darr;</span> Resume</a>
     </div>
   </header>
 
   <main id="main">
-    <!-- HERO -->
-    <section class="hero" id="top">
-      <div class="container">
-        <p class="eyebrow mono">~/whoami</p>
-        <h1>Hi, I'm Salah.</h1>
-        <p class="hero__tagline">Cloud security, built one bucket at a time.</p>
-        <p class="hero__meta">CS junior @ UCF &middot; aspiring Cloud Security Engineer</p>
-        <div class="hero__links">
-          <a class="btn" href="https://github.com/sa1aj" target="_blank" rel="noopener">GitHub</a>
-          <!-- TODO: add your LinkedIn URL -->
-          <a class="btn btn--ghost" href="#" target="_blank" rel="noopener">LinkedIn</a>
-          <!-- TODO: add assets/resume.pdf or remove this button -->
-          <a class="btn btn--ghost" href="assets/resume.pdf">Resume</a>
+    <!-- HERO (static for now; line field + orb come in later steps) -->
+    <section class="hero" id="top" aria-labelledby="hero-h">
+      <div class="hero__center">
+        <p class="label hero__kicker">Salah Yacoub &mdash; Cloud Security</p>
+        <h1 class="hero__title" id="hero-h">Secure by<br>default.</h1>
+      </div>
+      <div class="hero__bottom">
+        <p class="hero__intro">CS @ UCF. Building on AWS and learning to secure what I build.</p>
+        <button class="hint label" type="button" id="hint">psst&hellip; press <kbd>`</kbd> or tap <kbd>&gt;_</kbd></button>
+        <div class="hero__ctas">
+          <a class="pill pill--grad" href="#projects">See my work</a>
+          <a class="pill" href="#contact">Get in touch</a>
         </div>
-        <button class="hint mono" type="button" id="hint">
-          <span class="hint__dot" aria-hidden="true"></span>
-          psst&hellip; press <kbd>`</kbd> or tap <kbd>&gt;_</kbd> to open terminal mode. there's a flag hidden in there.
-        </button>
+      </div>
+    </section>
+
+    <!-- WORK -->
+    <section class="section" id="projects" aria-labelledby="work-h">
+      <div class="container">
+        <h2 class="display" id="work-h">Selected work</h2>
+        <ol class="work">
+          <li class="work__row">
+            <span class="work__meta label"><b>01</b> S3 &middot; CloudFront &middot; GuardDuty</span>
+            <h3 class="work__title">Secure Photography Site</h3>
+            <p class="work__desc">Static site on Amazon S3 behind CloudFront with locked-down access and GuardDuty threat alerting.</p>
+            <span class="work__arrow" aria-hidden="true">&#8599;</span>
+          </li>
+          <li class="work__row">
+            <span class="work__meta label"><b>02</b> Hackathon &middot; AWS Serverless</span>
+            <h3 class="work__title">Knightro Tracker</h3>
+            <p class="work__desc">Web app built at Knight Hacks IX to log campus Knightro sightings, with an AWS serverless backend.</p>
+            <span class="work__arrow" aria-hidden="true">&#8599;</span>
+          </li>
+          <li class="work__row">
+            <span class="work__meta label"><b>03</b> AWS Amplify &middot; AI Agent</span>
+            <h3 class="work__title">This Portfolio</h3>
+            <p class="work__desc">Designed and deployed on AWS Amplify Hosting using a specialized AI coding workflow.</p>
+            <span class="work__arrow" aria-hidden="true">&#8599;</span>
+          </li>
+        </ol>
       </div>
     </section>
 
     <!-- ABOUT -->
     <section class="section" id="about" aria-labelledby="about-h">
       <div class="container about">
-        <div>
-          <p class="eyebrow mono">01 / about</p>
-          <h2 id="about-h">About me</h2>
-          <p>
-            I'm a junior studying Computer Science at the <strong>University of Central Florida</strong>,
-            after transferring from the University of South Florida. I'm focused on <strong>cloud security</strong>,
-            meaning the work of making infrastructure secure by default instead of patching it afterward,
-            and I'm working toward a role as a <strong>Cloud Security Engineer</strong>.
-          </p>
-          <p>
-            I learn best by building: deploying real things on AWS, locking them down, and then
-            watching what the logs and alerts tell me.
-          </p>
-          <p>
-            Away from the keyboard I'm usually behind a camera. Photography taught me to pay attention to detail,
-            which turns out to matter a lot in security too.
-          </p>
-        </div>
-        <!-- TODO: replace placeholders with your photos, e.g.
-             <figure class="photo"><img src="assets/photo-1.jpg" alt="Describe the photo" loading="lazy"></figure> -->
-        <div class="photos" aria-label="Photography">
-          <figure class="photo photo--placeholder"><span>your photo</span></figure>
-          <figure class="photo photo--placeholder"><span>your photo</span></figure>
-          <figure class="photo photo--placeholder"><span>your photo</span></figure>
+        <h2 class="display about__h" id="about-h">From debugging C to defending clouds.</h2>
+        <div class="about__body">
+          <p class="lead">I'm a CS junior at UCF, focused on cloud security. I spend my time building hands-on projects, working toward AWS certifications, and figuring out how to make complex systems bulletproof.</p>
+          <p class="muted">When I'm not in the terminal, you'll find me behind a camera lens. My background in photography informs my eye for detail and composition in engineering.</p>
+          <!-- TODO: replace with your photos: <img src="assets/photo-1.jpg" alt="..." loading="lazy"> inside each .photo__frame -->
+          <div class="photos">
+            <figure class="photo"><div class="photo__frame"></div><figcaption class="label">01 &middot; Orlando, FL &mdash; 35mm</figcaption></figure>
+            <figure class="photo"><div class="photo__frame"></div><figcaption class="label">02 &middot; Golden hour &mdash; Portrait</figcaption></figure>
+            <figure class="photo"><div class="photo__frame"></div><figcaption class="label">03 &middot; TODO caption</figcaption></figure>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- SKILLS -->
-    <section class="section section--alt" id="skills" aria-labelledby="skills-h">
+    <section class="section section--band" id="skills" aria-labelledby="skills-h">
       <div class="container">
-        <p class="eyebrow mono">02 / skills</p>
-        <h2 id="skills-h">Skills</h2>
+        <h2 class="sr-only" id="skills-h">Skills</h2>
         <div class="skills">
-          <div class="skill-group">
-            <h3>Languages</h3>
-            <ul class="tags">
-              <li>Python</li><li>Java</li><li>C</li>
-            </ul>
-          </div>
-          <div class="skill-group">
-            <h3>Cloud &amp; Security</h3>
-            <ul class="tags">
-              <li>Amazon S3</li><li>CloudFront</li><li>GuardDuty</li><li>AWS Serverless</li><li>Amplify Hosting</li>
-            </ul>
-          </div>
-          <div class="skill-group">
-            <h3>Web &amp; Tools</h3>
-            <ul class="tags">
-              <li>HTML / CSS / JavaScript</li><li>Git &amp; GitHub</li>
-            </ul>
-          </div>
-          <div class="skill-group">
-            <h3>Beyond code</h3>
-            <ul class="tags">
-              <li>Photography</li><li>Hackathons</li><li>Team collaboration</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- PROJECTS -->
-    <section class="section" id="projects" aria-labelledby="projects-h">
-      <div class="container">
-        <p class="eyebrow mono">03 / projects</p>
-        <h2 id="projects-h">Projects</h2>
-        <div class="cards">
-          <article class="card">
-            <p class="card__kicker mono">cloud security</p>
-            <h3>Secure Photography Site</h3>
-            <p>
-              A static site for my photography served from Amazon S3 through CloudFront,
-              with Amazon GuardDuty watching the account for threats and sending alerts.
-            </p>
-            <ul class="tags tags--sm">
-              <li>S3</li><li>CloudFront</li><li>GuardDuty</li>
-            </ul>
-            <div class="card__links">
-              <!-- TODO: live URL + repo -->
-              <a href="#">Live site &rarr;</a>
-              <a href="https://github.com/sa1aj" target="_blank" rel="noopener">Code &rarr;</a>
-            </div>
-          </article>
-
-          <article class="card">
-            <p class="card__kicker mono">hackathon &middot; team of 4</p>
-            <h3>Knightro Tracker</h3>
-            <p>
-              A web app my team of four built at <strong>Knight Hacks IX</strong>, running on an
-              AWS serverless backend.
-              <!-- TODO: one line on what it does and the part you built -->
-            </p>
-            <ul class="tags tags--sm">
-              <li>AWS Serverless</li><li>Knight Hacks IX</li>
-            </ul>
-            <div class="card__links">
-              <!-- TODO: Devpost / repo links -->
-              <a href="#">Devpost &rarr;</a>
-              <a href="https://github.com/sa1aj" target="_blank" rel="noopener">Code &rarr;</a>
-            </div>
-          </article>
+          <div class="skill"><p class="label skill__label" style="--c: var(--orange)">Languages</p>
+            <ul><li>Python</li><li>Java</li><li>C</li><li>JavaScript</li></ul></div>
+          <div class="skill"><p class="label skill__label" style="--c: var(--teal)">Cloud (AWS)</p>
+            <ul><li>S3</li><li>CloudFront</li><li>IAM</li><li>Amplify</li><li>GuardDuty</li></ul></div>
+          <div class="skill"><p class="label skill__label" style="--c: var(--blue)">Security</p>
+            <ul><li>Least Privilege</li><li>Threat Detection</li><li>Incident Response</li></ul></div>
+          <div class="skill"><p class="label skill__label" style="--c: var(--violet)">Tools</p>
+            <ul><li>Git</li><li>Linux</li><li>Claude Code</li><li>Docker</li></ul></div>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
-    <div class="container footer__inner">
-      <p>&copy; <span id="year"></span> Salah Yacoub &middot; Hosted on AWS Amplify</p>
-      <p class="mono muted">type <kbd>`</kbd> &rarr; <code>help</code></p>
+  <!-- CONTACT / FOOTER -->
+  <footer class="contact" id="contact" aria-labelledby="contact-h">
+    <div class="container">
+      <h2 class="display contact__h" id="contact-h">Let's build<br>something secure.</h2>
+      <ul class="contact__links">
+        <!-- TODO: real email + LinkedIn URL -->
+        <li><a href="mailto:you@example.com">Email</a></li>
+        <li><a href="https://github.com/sa1aj" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="#" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="assets/resume.pdf" download>Resume</a></li>
+      </ul>
+      <div class="contact__base label">
+        <span>&copy; 2026 Salah Yacoub</span>
+        <span>UCF Computer Science</span>
+        <span>type <kbd>`</kbd> &rarr; help</span>
+      </div>
     </div>
   </footer>
 
-  <!-- TERMINAL (non-modal panel; page stays usable behind it) -->
+  <!-- TERMINAL (markup unchanged; terminal.js depends on these ids) -->
   <section class="terminal" id="terminal" aria-label="Terminal mode" hidden>
     <div class="terminal__bar">
       <span class="terminal__dots" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -203,6 +166,6 @@
     </form>
   </section>
 
-  <script src="js/terminal.js" defer></script>
+  <script src="js/terminal.js?v=2" defer></script>
 </body>
 </html>
