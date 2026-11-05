@@ -247,6 +247,19 @@ kbd {
 .work__desc { margin: 0; color: var(--muted); font-size: .92rem; max-width: 52ch; }
 .work__arrow { font-size: 1.2rem; color: var(--dim); }
 
+/* Row hover: name goes italic; index, tags and description brighten; the other
+   rows dim slightly. Colour/opacity ease over 250ms. (font-style can't be
+   interpolated, so the italic swap itself is instant.) Only on devices with a
+   real hover, so a tap on a phone doesn't leave a row stuck "hovered". */
+.work__row, .work__meta, .work__meta b, .work__desc { transition: opacity .25s ease, color .25s ease; }
+@media (hover: hover) {
+  .work__row:hover .work__title { font-style: italic; }
+  .work__row:hover .work__meta,
+  .work__row:hover .work__meta b,
+  .work__row:hover .work__desc { color: var(--text); }
+  .work:hover .work__row:not(:hover) { opacity: .55; }
+}
+
 @media (max-width: 900px) {
   .work__row { grid-template-columns: 1fr auto; gap: .5rem 1rem; }
   .work__meta, .work__desc { grid-column: 1 / -1; }
@@ -348,4 +361,5 @@ kbd {
 
 @media (prefers-reduced-motion: reduce) {
   .terminal { transition: none; }
+  .work__row, .work__meta, .work__meta b, .work__desc { transition: none; }
 }
