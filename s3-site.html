@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Secure Photography Site | Salah Yacoub</title>
+  <meta name="description" content="A static site on a private S3 bucket behind CloudFront, with least-privilege IAM, encrypted audit logs and automated threat alerts.">
+  <meta name="theme-color" content="#070707">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="css/style.css?v=18">
+  <script>
+    (function () { try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {} })();
+  </script>
+</head>
+<body class="project">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="pnav">
+    <a class="label pnav__back" href="index.html#projects"><span aria-hidden="true">&larr;</span> Back to work</a>
+    <a class="nav__logo" href="index.html" aria-label="Salah Yacoub, home">SY</a>
+  </header>
+
+  <main id="main">
+    <section class="phero" aria-labelledby="ptitle">
+      <div class="container">
+        <p class="label phero__tags">02 · S3 · CLOUDFRONT · IAM · CLOUDTRAIL · GUARDDUTY</p>
+        <h1 class="display phero__title" id="ptitle">Secure Photography Site</h1>
+        <p class="phero__sum">A static site on a private S3 bucket behind CloudFront, with least-privilege IAM, encrypted audit logs and automated threat alerts.</p>
+        <div class="phero__ctas">
+          <a class="pill pill--grad" href="https://d1217q3p42xaah.cloudfront.net" target="_blank" rel="noopener">Live <span aria-hidden="true">&#8599;</span></a>
+          <a class="pill" href="https://github.com/sa1aj/secure-static-site-aws" target="_blank" rel="noopener">Code <span aria-hidden="true">&#8599;</span></a>
+        </div>
+      </div>
+    </section>
+
+    <div class="pbody">
+      <div class="container pgrid">
+        <section class="pblock" aria-labelledby="s3-site-overview">
+          <h2 class="label pblock__h" id="s3-site-overview">Overview</h2>
+          <div class="pblock__body">
+<p>Most beginner AWS projects stop at "host a static site on S3." I wrapped the hosting layer in the controls used in production environments:</p>
+<ul class="plist"><li>a private origin</li><li>least-privilege access</li><li>full audit logging</li><li>automated threat detection with real-time alerts</li></ul>
+          </div>
+        </section>
+        <section class="pblock" aria-labelledby="s3-site-what-i-built">
+          <h2 class="label pblock__h" id="s3-site-what-i-built">What I built</h2>
+          <div class="pblock__body">
+<ul class="plist"><li><strong>Private origin:</strong> an S3 bucket with all public access blocked, served only through CloudFront using Origin Access Control scoped to a single distribution.</li><li><strong>Encryption in transit:</strong> CloudFront redirects every HTTP request to HTTPS.</li><li><strong>Audit logging:</strong> CloudTrail captures management and data events, encrypted with a customer-managed KMS key and with log file validation for tamper detection.</li><li><strong>Detection and response:</strong> GuardDuty monitors the account. An EventBridge rule filtered to Medium/High severity sends findings to SNS as an email alert.</li></ul>
+          </div>
+        </section>
+        <section class="pblock pblock--security" aria-labelledby="s3-site-security">
+          <h2 class="label pblock__h" id="s3-site-security">Security</h2>
+          <div class="pblock__body">
+<p>I wrote a custom IAM policy for my working user. It allows only <code>GetObject</code>, <code>PutObject</code>, <code>DeleteObject</code> and <code>ListBucket</code>, scoped to this bucket's ARN, with no wildcard actions or resources and no AdministratorAccess. To verify it, I confirmed that an out-of-scope action was denied.</p>
+          </div>
+        </section>
+        <section class="pblock" aria-labelledby="s3-site-challenges">
+          <h2 class="label pblock__h" id="s3-site-challenges">Challenges</h2>
+          <div class="pblock__body">
+<p>GuardDuty raised a real finding during development: <code>Policy:IAMUser/RootCredentialUsage</code>, meaning an API call had been made with root credentials. I traced it to leftover activity from initial setup. I then moved all ongoing work to the dedicated least-privilege IAM user and took root out of routine use.</p>
+          </div>
+        </section>
+        <section class="pblock" aria-labelledby="s3-site-what-i-learned">
+          <h2 class="label pblock__h" id="s3-site-what-i-learned">What I learned</h2>
+          <div class="pblock__body">
+<p>Security controls only count if you verify them. Watching my own alert pipeline catch a real issue taught me more than any sample finding. Next, I want to rebuild the stack with Terraform so it's reproducible from a single <code>apply</code>.</p>
+          </div>
+        </section>
+        <section class="pblock pblock--gallery" aria-labelledby="s3-site-gallery">
+          <h2 class="label pblock__h" id="s3-site-gallery">Gallery</h2>
+          <div class="gallery">
+          <figure class="gallery__item gallery__item--wide">
+            <a href="assets/projects/s3-site/static-website.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/static-website.jpg" alt="The live site, served through CloudFront" width="1600" height="925" loading="lazy" decoding="async"></a>
+            <figcaption class="label">The live site, served through CloudFront</figcaption>
+          </figure>
+          <figure class="gallery__item gallery__item--wide">
+            <a href="assets/projects/s3-site/block-public-access.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/block-public-access.jpg" alt="S3 Block Public Access: all public access blocked" width="1600" height="280" loading="lazy" decoding="async"></a>
+            <figcaption class="label">S3 Block Public Access: all public access blocked</figcaption>
+          </figure>
+          <figure class="gallery__item">
+            <a href="assets/projects/s3-site/IAM-user-least-privileges.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/IAM-user-least-privileges.jpg" alt="Custom least-privilege IAM policy" width="1600" height="889" loading="lazy" decoding="async"></a>
+            <figcaption class="label">Custom least-privilege IAM policy</figcaption>
+          </figure>
+          <figure class="gallery__item gallery__item--wide">
+            <a href="assets/projects/s3-site/denied-dueto-privileges.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/denied-dueto-privileges.jpg" alt="An out-of-scope action, denied" width="1600" height="317" loading="lazy" decoding="async"></a>
+            <figcaption class="label">An out-of-scope action, denied</figcaption>
+          </figure>
+          <figure class="gallery__item gallery__item--wide">
+            <a href="assets/projects/s3-site/working-guardduty-event.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/working-guardduty-event.jpg" alt="GuardDuty finding: root credential usage" width="1600" height="294" loading="lazy" decoding="async"></a>
+            <figcaption class="label">GuardDuty finding: root credential usage</figcaption>
+          </figure>
+          <figure class="gallery__item gallery__item--wide">
+            <a href="assets/projects/s3-site/eventbridge-rule.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/eventbridge-rule.jpg" alt="EventBridge rule sending GuardDuty findings to SNS" width="1600" height="700" loading="lazy" decoding="async"></a>
+            <figcaption class="label">EventBridge rule sending GuardDuty findings to SNS</figcaption>
+          </figure>
+          <figure class="gallery__item gallery__item--wide">
+            <a href="assets/projects/s3-site/working-cloudtrail-log.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/working-cloudtrail-log.jpg" alt="CloudTrail event history" width="1600" height="256" loading="lazy" decoding="async"></a>
+            <figcaption class="label">CloudTrail event history</figcaption>
+          </figure>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <nav class="container pnext" aria-label="Next project">
+      <a href="portfolio.html">
+        <span class="label">Next project <span aria-hidden="true">&rarr;</span></span>
+        <span class="pnext__title">This Portfolio</span>
+      </a>
+    </nav>
+  </main>
+
+  <footer class="container pfoot label">
+    <span>&copy; 2026 Salah Yacoub</span>
+    <a href="index.html#contact">Get in touch &rarr;</a>
+  </footer>
+</body>
+</html>

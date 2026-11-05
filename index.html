@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
   <!-- ?v= forces browsers to fetch the new file instead of a cached old one -->
-  <link rel="stylesheet" href="css/style.css?v=17">
+  <link rel="stylesheet" href="css/style.css?v=18">
   <script>
     // Apply saved theme before paint to avoid a flash.
     (function () {
@@ -69,23 +69,29 @@
       <div class="container">
         <h2 class="display" id="work-h">Selected work</h2>
         <ol class="work">
-          <li class="work__row" data-preview="photo-site">
-            <span class="work__meta label"><b>01</b> S3 &middot; CloudFront &middot; GuardDuty</span>
-            <h3 class="work__title">Secure Photography Site</h3>
-            <p class="work__desc">Static site on Amazon S3 behind CloudFront with locked-down access and GuardDuty threat alerting.</p>
-            <span class="work__arrow" aria-hidden="true">&#8599;</span>
+          <li>
+            <a class="work__row" href="knightro.html" data-preview="knightro-tracker">
+              <span class="work__meta label"><b>01</b> HACKATHON &middot; API GATEWAY &middot; LAMBDA &middot; DYNAMODB → SUPABASE</span>
+              <h3 class="work__title">Knightro Tracker</h3>
+              <p class="work__desc">A live map of Knightro sightings across UCF's campuses. I built the original serverless AWS backend at Knight Hacks IX.</p>
+              <span class="work__arrow" aria-hidden="true">&#8599;</span>
+            </a>
           </li>
-          <li class="work__row" data-preview="knightro-tracker">
-            <span class="work__meta label"><b>02</b> Hackathon &middot; AWS Serverless</span>
-            <h3 class="work__title">Knightro Tracker</h3>
-            <p class="work__desc">Web app built at Knight Hacks IX to log campus Knightro sightings, with an AWS serverless backend.</p>
-            <span class="work__arrow" aria-hidden="true">&#8599;</span>
+          <li>
+            <a class="work__row" href="s3-site.html" data-preview="photo-site">
+              <span class="work__meta label"><b>02</b> S3 &middot; CLOUDFRONT &middot; IAM &middot; CLOUDTRAIL &middot; GUARDDUTY</span>
+              <h3 class="work__title">Secure Photography Site</h3>
+              <p class="work__desc">A static site on a private S3 bucket behind CloudFront, with least-privilege IAM, encrypted audit logs and automated threat alerts.</p>
+              <span class="work__arrow" aria-hidden="true">&#8599;</span>
+            </a>
           </li>
-          <li class="work__row" data-preview="this-portfolio">
-            <span class="work__meta label"><b>03</b> AWS Amplify &middot; AI Agent</span>
-            <h3 class="work__title">This Portfolio</h3>
-            <p class="work__desc">Designed and deployed on AWS Amplify Hosting using a specialized AI coding workflow.</p>
-            <span class="work__arrow" aria-hidden="true">&#8599;</span>
+          <li>
+            <a class="work__row" href="portfolio.html" data-preview="this-portfolio">
+              <span class="work__meta label"><b>03</b> AWS AMPLIFY &middot; IAM &middot; GITHUB &middot; AI AGENT</span>
+              <h3 class="work__title">This Portfolio</h3>
+              <p class="work__desc">Designed and deployed on AWS Amplify Hosting with an AI coding agent. It hides a terminal with a capture-the-flag challenge.</p>
+              <span class="work__arrow" aria-hidden="true">&#8599;</span>
+            </a>
           </li>
         </ol>
       </div>
@@ -176,6 +182,6 @@
 
   <script src="js/terminal.js?v=3" defer></script>
   <script src="js/hero.js?v=15" defer></script>
-  <script src="js/work.js?v=17" defer></script>
+  <script src="js/work.js?v=18" defer></script>
 </body>
 </html>

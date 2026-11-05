@@ -238,6 +238,8 @@ kbd {
   padding: clamp(1.6rem, 3vw, 2.6rem) 0;
   border-top: 1px solid var(--border);
 }
+a.work__row { color: inherit; text-decoration: none; }
+a.work__row:focus-visible { outline-offset: -2px; }
 .work__meta { color: var(--dim); font-size: .62rem; letter-spacing: .12em; }
 .work__meta b { color: var(--muted); font-weight: 500; margin-right: .9em; }
 .work__title {
@@ -252,6 +254,10 @@ kbd {
    interpolated, so the italic swap itself is instant.) Only on devices with a
    real hover, so a tap on a phone doesn't leave a row stuck "hovered". */
 .work__row, .work__meta, .work__meta b, .work__desc { transition: opacity .25s ease, color .25s ease; }
+.work__row:focus-visible .work__title { font-style: italic; }
+.work__row:focus-visible .work__meta,
+.work__row:focus-visible .work__meta b,
+.work__row:focus-visible .work__desc { color: var(--text); }
 @media (hover: hover) {
   .work__row:hover .work__title { font-style: italic; }
   .work__row:hover .work__meta,
@@ -380,6 +386,66 @@ kbd {
   caret-color: var(--term-accent);
 }
 @media (max-width: 420px) { .terminal__prompt { font-size: .74rem; } }
+
+/* ============ Project pages (knightro.html, s3-site.html, portfolio.html) ============ */
+.pnav {
+  position: absolute; inset: 0 0 auto 0; z-index: 10;
+  display: flex; justify-content: space-between; align-items: center;
+  height: 88px; padding-inline: var(--pad);
+}
+.pnav__back { color: var(--muted); text-decoration: none; }
+.pnav__back:hover { color: var(--text); }
+
+.phero {
+  position: relative;
+  padding: clamp(9rem, 18vw, 13rem) 0 clamp(4rem, 8vw, 6.5rem);
+  border-bottom: 1px solid var(--border);
+  background: radial-gradient(70% 90% at 0% 0%, color-mix(in srgb, var(--orange) 7%, transparent), transparent 70%);
+}
+.phero__tags { color: var(--orange); margin-bottom: 1.6rem; }
+.phero__title { font-size: clamp(3rem, 8vw, 8.2rem); margin-bottom: 2rem; }
+.phero__sum { max-width: 46ch; font-size: clamp(1.05rem, 1.5vw, 1.3rem); line-height: 1.55; color: var(--muted); margin-bottom: 2.6rem; }
+.phero__ctas { display: flex; flex-wrap: wrap; gap: .9rem; }
+
+.pbody { padding: clamp(4rem, 8vw, 7rem) 0; }
+.pgrid { display: grid; gap: clamp(3.5rem, 7vw, 5.5rem) clamp(2.5rem, 6vw, 6rem); }
+@media (min-width: 960px) { .pgrid { grid-template-columns: 1fr 1fr; } }
+.pblock__h { margin-bottom: 1.6rem; }
+.pblock--security .pblock__h { color: var(--orange); }
+.pblock__body { font-size: clamp(1rem, 1.25vw, 1.12rem); line-height: 1.6; }
+.pblock__body p { max-width: 60ch; }
+.pblock__body code {
+  font-size: .86em; color: var(--text);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  padding: .08em .35em; border-radius: 4px;
+}
+.plist { display: grid; gap: 1.1rem; margin: 0 0 1em; }
+.plist > li { padding-left: 1.1rem; border-left: 1px solid color-mix(in srgb, var(--orange) 45%, transparent); }
+.plist > li:nth-child(3n+2) { border-left-color: color-mix(in srgb, var(--teal) 45%, transparent); }
+.plist > li:nth-child(3n+3) { border-left-color: color-mix(in srgb, var(--violet) 45%, transparent); }
+.plist--sub { gap: .55rem; margin: .8rem 0 0; }
+.plist--sub > li { border-left-color: var(--border-strong) !important; color: var(--muted); }
+
+.pblock--gallery { grid-column: 1 / -1; }
+.gallery { display: grid; gap: 1.1rem; grid-auto-flow: dense; }
+@media (min-width: 760px) { .gallery { grid-template-columns: 1fr 1fr; } }
+.gallery__item { margin: 0; }
+.gallery__item--wide { grid-column: 1 / -1; }
+.gallery__item a { display: block; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.gallery__item img { width: 100%; height: auto; }
+.gallery__item a:hover { border-color: var(--muted); }
+.gallery__item figcaption { margin-top: .7rem; font-size: .6rem; color: var(--dim); }
+
+.pnext { padding-bottom: clamp(4rem, 8vw, 6rem); }
+.pnext a {
+  display: flex; justify-content: space-between; align-items: end; gap: 1rem; flex-wrap: wrap;
+  padding-top: 2.2rem; border-top: 1px solid var(--border); text-decoration: none;
+}
+.pnext__title { font-family: var(--serif); font-size: clamp(2rem, 5vw, 4rem); line-height: 1; letter-spacing: -.02em; }
+@media (hover: hover) { .pnext a:hover .pnext__title { font-style: italic; } }
+.pfoot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .75rem; padding-bottom: 2.5rem; font-size: .6rem; color: var(--dim); }
+.pfoot a { text-decoration: none; }
+.pfoot a:hover { color: var(--text); }
 
 @media (prefers-reduced-motion: reduce) {
   .terminal { transition: none; }

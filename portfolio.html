@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>This Portfolio | Salah Yacoub</title>
+  <meta name="description" content="Designed and deployed on AWS Amplify Hosting with an AI coding agent. It hides a terminal with a capture-the-flag challenge.">
+  <meta name="theme-color" content="#070707">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="css/style.css?v=18">
+  <script>
+    (function () { try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {} })();
+  </script>
+</head>
+<body class="project">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="pnav">
+    <a class="label pnav__back" href="index.html#projects"><span aria-hidden="true">&larr;</span> Back to work</a>
+    <a class="nav__logo" href="index.html" aria-label="Salah Yacoub, home">SY</a>
+  </header>
+
+  <main id="main">
+    <section class="phero" aria-labelledby="ptitle">
+      <div class="container">
+        <p class="label phero__tags">03 · AWS AMPLIFY · IAM · GITHUB · AI AGENT</p>
+        <h1 class="display phero__title" id="ptitle">This Portfolio</h1>
+        <p class="phero__sum">Designed and deployed on AWS Amplify Hosting with an AI coding agent. It hides a terminal with a capture-the-flag challenge.</p>
+        <div class="phero__ctas">
+          <!-- Live button: add once the Amplify URL exists -->
+          <a class="pill" href="https://github.com/sa1aj/portfolio" target="_blank" rel="noopener">Code <span aria-hidden="true">&#8599;</span></a>
+        </div>
+      </div>
+    </section>
+
+    <div class="pbody">
+      <div class="container pgrid">
+        <section class="pblock" aria-labelledby="portfolio-overview">
+          <h2 class="label pblock__h" id="portfolio-overview">Overview</h2>
+          <div class="pblock__body">
+<p>This site is my entry for the AWS Builder Center student portfolio hackathon. It's built to feel cinematic while staying fast and easy to navigate. There's a hidden way in for curious visitors.</p>
+          </div>
+        </section>
+        <section class="pblock" aria-labelledby="portfolio-what-i-built">
+          <h2 class="label pblock__h" id="portfolio-what-i-built">What I built</h2>
+          <div class="pblock__body">
+<ul class="plist"><li><strong>The hero line field:</strong> a canvas of flowing lines that warp around your cursor with a color glow. The lines fade out at the edges.</li><li><strong>SY-Cloud-Shell:</strong> a working in-browser terminal (press <code><code></code> or tap </code>&gt;_<code>) with commands like </code>help<code>, </code>whoami<code> and </code>ls projects`.</li><li><strong>A capture-the-flag challenge:</strong> visitors find a hidden encoded file and decode it (base64 → ROT13) to recover the flag. The site stores only a hash of the answer, so the flag can't be read from the source.</li><li><strong>Deployment:</strong> the code lives on GitHub and deploys automatically through AWS Amplify Hosting on every push.</li></ul>
+          </div>
+        </section>
+        <section class="pblock pblock--security" aria-labelledby="portfolio-security">
+          <h2 class="label pblock__h" id="portfolio-security">Security</h2>
+          <div class="pblock__body">
+<ul class="plist"><li>I directed an AI coding agent (Claude Code, with the AWS Agent Toolkit) that had access to my AWS account. That access goes through a dedicated IAM user protected with MFA, not the root account.</li><li>I started on root to save time, then switched. That's the same lesson GuardDuty taught me on my S3 project.</li><li>I reviewed every file before pushing to a public repo to make sure no secrets were included.</li></ul>
+          </div>
+        </section>
+        <section class="pblock" aria-labelledby="portfolio-challenges">
+          <h2 class="label pblock__h" id="portfolio-challenges">Challenges</h2>
+          <div class="pblock__body">
+<p>My first attempt at a full redesign was one giant prompt, and it broke the site. I rolled back with git and rebuilt in small steps (layout, then the line field, then interactions), committing after each one. That's how it finally came together.</p>
+          </div>
+        </section>
+        <section class="pblock" aria-labelledby="portfolio-what-i-learned">
+          <h2 class="label pblock__h" id="portfolio-what-i-learned">What I learned</h2>
+          <div class="pblock__body">
+<ul class="plist"><li>How to direct an AI agent well: specific instructions, small steps, review everything and keep a rollback point.</li><li>How Amplify packages what I built by hand on my S3 project (storage, CDN, HTTPS) into a managed workflow.</li></ul>
+          </div>
+        </section>
+        <section class="pblock pblock--gallery" aria-labelledby="portfolio-gallery">
+          <h2 class="label pblock__h" id="portfolio-gallery">Gallery</h2>
+          <div class="gallery">
+          <figure class="gallery__item gallery__item--wide">
+            <a href="assets/projects/portfolio/hero.jpg" target="_blank" rel="noopener"><img src="assets/projects/portfolio/hero.jpg" alt="The hero line field" width="1600" height="918" loading="lazy" decoding="async"></a>
+            <figcaption class="label">The hero line field</figcaption>
+          </figure>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <nav class="container pnext" aria-label="Next project">
+      <a href="knightro.html">
+        <span class="label">Next project <span aria-hidden="true">&rarr;</span></span>
+        <span class="pnext__title">Knightro Tracker</span>
+      </a>
+    </nav>
+  </main>
+
+  <footer class="container pfoot label">
+    <span>&copy; 2026 Salah Yacoub</span>
+    <a href="index.html#contact">Get in touch &rarr;</a>
+  </footer>
+</body>
+</html>
