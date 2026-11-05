@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Salah Yacoub | Cloud Security</title>
+  <meta name="description" content="Salah Yacoub - CS junior at UCF focused on cloud security. Projects, skills, and a terminal mode with a hidden CTF.">
+  <meta name="theme-color" content="#0d0f12">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    // Apply saved theme before paint to avoid a flash.
+    (function () {
+      var t = localStorage.getItem("theme");
+      if (t) document.documentElement.dataset.theme = t;
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav__inner">
+      <a class="nav__logo" href="#top" aria-label="Home">salah<span class="accent">.</span>sec</a>
+      <nav aria-label="Primary">
+        <ul class="nav__links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#projects">Projects</a></li>
+        </ul>
+      </nav>
+      <div class="nav__actions">
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle light/dark theme" title="Toggle theme">
+          <span aria-hidden="true">◐</span>
+        </button>
+        <button class="icon-btn icon-btn--term" id="term-toggle" type="button"
+                aria-controls="terminal" aria-expanded="false" title="Terminal mode ( ` )">
+          <span aria-hidden="true">&gt;_</span><span class="sr-only">Open terminal mode</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <div class="container">
+        <p class="eyebrow mono">~/whoami</p>
+        <h1>Hi, I'm Salah.</h1>
+        <p class="hero__tagline">Cloud security, built one bucket at a time.</p>
+        <p class="hero__meta">CS junior @ UCF &middot; aspiring Cloud Security Engineer</p>
+        <div class="hero__links">
+          <a class="btn" href="https://github.com/sa1aj" target="_blank" rel="noopener">GitHub</a>
+          <!-- TODO: add your LinkedIn URL -->
+          <a class="btn btn--ghost" href="#" target="_blank" rel="noopener">LinkedIn</a>
+          <!-- TODO: add assets/resume.pdf or remove this button -->
+          <a class="btn btn--ghost" href="assets/resume.pdf">Resume</a>
+        </div>
+        <button class="hint mono" type="button" id="hint">
+          <span class="hint__dot" aria-hidden="true"></span>
+          psst&hellip; press <kbd>`</kbd> or tap <kbd>&gt;_</kbd> to open terminal mode. there's a flag hidden in there.
+        </button>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section" id="about" aria-labelledby="about-h">
+      <div class="container about">
+        <div>
+          <p class="eyebrow mono">01 / about</p>
+          <h2 id="about-h">About me</h2>
+          <p>
+            I'm a junior studying Computer Science at the <strong>University of Central Florida</strong>,
+            after transferring from the University of South Florida. I'm focused on <strong>cloud security</strong>,
+            meaning the work of making infrastructure secure by default instead of patching it afterward,
+            and I'm working toward a role as a <strong>Cloud Security Engineer</strong>.
+          </p>
+          <p>
+            I learn best by building: deploying real things on AWS, locking them down, and then
+            watching what the logs and alerts tell me.
+          </p>
+          <p>
+            Away from the keyboard I'm usually behind a camera. Photography taught me to pay attention to detail,
+            which turns out to matter a lot in security too.
+          </p>
+        </div>
+        <!-- TODO: replace placeholders with your photos, e.g.
+             <figure class="photo"><img src="assets/photo-1.jpg" alt="Describe the photo" loading="lazy"></figure> -->
+        <div class="photos" aria-label="Photography">
+          <figure class="photo photo--placeholder"><span>your photo</span></figure>
+          <figure class="photo photo--placeholder"><span>your photo</span></figure>
+          <figure class="photo photo--placeholder"><span>your photo</span></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section class="section section--alt" id="skills" aria-labelledby="skills-h">
+      <div class="container">
+        <p class="eyebrow mono">02 / skills</p>
+        <h2 id="skills-h">Skills</h2>
+        <div class="skills">
+          <div class="skill-group">
+            <h3>Languages</h3>
+            <ul class="tags">
+              <li>Python</li><li>Java</li><li>C</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <h3>Cloud &amp; Security</h3>
+            <ul class="tags">
+              <li>Amazon S3</li><li>CloudFront</li><li>GuardDuty</li><li>AWS Serverless</li><li>Amplify Hosting</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <h3>Web &amp; Tools</h3>
+            <ul class="tags">
+              <li>HTML / CSS / JavaScript</li><li>Git &amp; GitHub</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <h3>Beyond code</h3>
+            <ul class="tags">
+              <li>Photography</li><li>Hackathons</li><li>Team collaboration</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="section" id="projects" aria-labelledby="projects-h">
+      <div class="container">
+        <p class="eyebrow mono">03 / projects</p>
+        <h2 id="projects-h">Projects</h2>
+        <div class="cards">
+          <article class="card">
+            <p class="card__kicker mono">cloud security</p>
+            <h3>Secure Photography Site</h3>
+            <p>
+              A static site for my photography served from Amazon S3 through CloudFront,
+              with Amazon GuardDuty watching the account for threats and sending alerts.
+            </p>
+            <ul class="tags tags--sm">
+              <li>S3</li><li>CloudFront</li><li>GuardDuty</li>
+            </ul>
+            <div class="card__links">
+              <!-- TODO: live URL + repo -->
+              <a href="#">Live site &rarr;</a>
+              <a href="https://github.com/sa1aj" target="_blank" rel="noopener">Code &rarr;</a>
+            </div>
+          </article>
+
+          <article class="card">
+            <p class="card__kicker mono">hackathon &middot; team of 4</p>
+            <h3>Knightro Tracker</h3>
+            <p>
+              A web app my team of four built at <strong>Knight Hacks IX</strong>, running on an
+              AWS serverless backend.
+              <!-- TODO: one line on what it does and the part you built -->
+            </p>
+            <ul class="tags tags--sm">
+              <li>AWS Serverless</li><li>Knight Hacks IX</li>
+            </ul>
+            <div class="card__links">
+              <!-- TODO: Devpost / repo links -->
+              <a href="#">Devpost &rarr;</a>
+              <a href="https://github.com/sa1aj" target="_blank" rel="noopener">Code &rarr;</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>&copy; <span id="year"></span> Salah Yacoub &middot; Hosted on AWS Amplify</p>
+      <p class="mono muted">type <kbd>`</kbd> &rarr; <code>help</code></p>
+    </div>
+  </footer>
+
+  <!-- TERMINAL (non-modal panel; page stays usable behind it) -->
+  <section class="terminal" id="terminal" aria-label="Terminal mode" hidden>
+    <div class="terminal__bar">
+      <span class="terminal__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="terminal__title mono">guest@salah.sec: ~</span>
+      <button class="terminal__close" id="term-close" type="button" aria-label="Close terminal">&times;</button>
+    </div>
+    <div class="terminal__out mono" id="term-out" role="log" aria-live="polite"></div>
+    <div class="terminal__chips" aria-label="Quick commands">
+      <button type="button" data-cmd="help">help</button>
+      <button type="button" data-cmd="whoami">whoami</button>
+      <button type="button" data-cmd="ls projects">ls projects</button>
+      <button type="button" data-cmd="ls -a">ls -a</button>
+      <button type="button" data-cmd="clear">clear</button>
+      <button type="button" data-cmd="exit">exit</button>
+    </div>
+    <form class="terminal__form mono" id="term-form" autocomplete="off">
+      <label for="term-in" class="terminal__prompt">guest@salah.sec:~$</label>
+      <input id="term-in" type="text" spellcheck="false" autocapitalize="off" autocorrect="off"
+             aria-label="Terminal command input" enterkeyhint="send">
+    </form>
+  </section>
+
+  <script src="js/terminal.js" defer></script>
+</body>
+</html>
