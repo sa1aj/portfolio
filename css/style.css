@@ -13,6 +13,8 @@
   --blue: #60a5fa;
   --violet: #a78bfa;
   --grad: linear-gradient(90deg, #f6b800 0%, #8fd14f 60%, #2fcf86 100%);
+  --line-rgb: 255, 255, 255;   /* hero line colour, read by js/hero.js */
+  --line-alpha: 0.3;
 
   --term-bg: #0b0b0b;
   --term-text: #e8e6e3;
@@ -38,6 +40,8 @@
   --teal: #0f8f80;
   --blue: #2563eb;
   --violet: #7c3aed;
+  --line-rgb: 18, 18, 18;
+  --line-alpha: 0.22;
   color-scheme: light;
 }
 
@@ -147,7 +151,11 @@ kbd {
   min-height: calc(100vh - 72px); min-height: calc(100svh - 72px);
   display: grid; grid-template-rows: 1fr auto;
   padding: 2rem var(--pad) clamp(1.5rem, 4vh, 2.75rem);
+  overflow: hidden;
 }
+/* Line field: behind the content and never catches clicks */
+.hero__lines { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.hero__center, .hero__bottom { position: relative; z-index: 1; }
 .hero__center { align-self: center; text-align: center; }
 .hero__kicker { margin-bottom: 1.6rem; }
 .hero__title {
