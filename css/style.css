@@ -171,13 +171,28 @@ kbd {
 @media (max-width: 760px) {
   .nav { --nav-h: 60px; grid-template-columns: auto 1fr auto; gap: .5rem; }
   .hero { --nav-h: 60px; }
-  .nav nav { justify-self: center; }
-  .nav__links { gap: .9rem; }
-  .nav__links a { font-size: .6rem; letter-spacing: .1em; }
+  .nav__actions { grid-column: 3; }
   .nav__resume { display: none; }   /* resume still in footer */
   .icon-btn { min-width: 32px; height: 32px; }
+
+  /* Phones: the section links move to a solid bar pinned to the bottom of the
+     screen (thumb reach); logo, theme and terminal stay at the top. */
+  :root { --bnav-h: 58px; }
+  .nav nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    height: calc(var(--bnav-h) + env(safe-area-inset-bottom));
+    padding: 0 var(--pad) env(safe-area-inset-bottom);
+    background: var(--bg); border-top: 1px solid var(--border);
+  }
+  .nav__links { height: 100%; align-items: center; justify-content: space-around; gap: 0; }
+  .nav__links a {
+    display: block; padding: .6rem .4rem;
+    font: 400 1.08rem var(--serif); letter-spacing: 0; text-transform: none; color: var(--text);
+  }
+  /* keep the bottom of the page (and the hero buttons) clear of the bar */
+  body { padding-bottom: calc(var(--bnav-h) + env(safe-area-inset-bottom)); }
+  .hero { padding-bottom: calc(clamp(1.5rem, 4vh, 2.75rem) + var(--bnav-h)); }
 }
-@media (max-width: 360px) { .nav__links li:last-child { display: none; } }
 
 /* ============ Hero (static) ============ */
 /* The hero slides up under the (sticky) nav so the line field fills the whole
