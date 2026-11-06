@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
   <!-- ?v= forces browsers to fetch the new file instead of a cached old one -->
-  <link rel="stylesheet" href="css/style.css?v=30">
+  <link rel="stylesheet" href="css/style.css?v=33">
   <script>
     // Apply saved theme before paint to avoid a flash.
     (function () {
@@ -110,20 +110,69 @@
     </section>
 
     <!-- ABOUT -->
-    <section class="section" id="about" aria-labelledby="about-h">
+    <section class="section about-sec" id="about" aria-labelledby="about-h">
       <div class="container about">
         <h2 class="display about__h" id="about-h">From debugging C to defending clouds.</h2>
         <div class="about__body">
-          <p class="lead">I'm a CS junior at UCF, focused on cloud security. I spend my time building hands-on projects, working toward AWS certifications, and figuring out how to make complex systems bulletproof.</p>
-          <p class="muted">When I'm not in the terminal, you'll find me behind a camera lens. My background in photography informs my eye for detail and composition in engineering.</p>
-          <!-- TODO: replace with your photos: <img src="assets/photo-1.jpg" alt="..." loading="lazy"> inside each .photo__frame -->
-          <div class="photos">
-            <figure class="photo"><div class="photo__frame"></div><figcaption class="label">01 &middot; Orlando, FL &mdash; 35mm</figcaption></figure>
-            <figure class="photo"><div class="photo__frame"></div><figcaption class="label">02 &middot; Golden hour &mdash; Portrait</figcaption></figure>
-            <figure class="photo"><div class="photo__frame"></div><figcaption class="label">03 &middot; TODO caption</figcaption></figure>
-          </div>
+          <p class="lead">I'm a computer science junior at UCF focused on cloud security. I learn by building: locking down a static site with least-privilege IAM and GuardDuty alerts, shipping a serverless backend at a hackathon, and deploying this site on AWS. Right now I'm studying for the AWS Cloud Practitioner exam and looking for internships in cloud and security.</p>
+          <dl class="facts">
+            <div class="facts__row"><dt class="label">Based in</dt><dd>Orlando, FL</dd></div>
+            <div class="facts__row"><dt class="label">Studying</dt><dd>Computer Science @ UCF</dd></div>
+            <div class="facts__row"><dt class="label">Graduating</dt><dd>Spring 2028</dd></div>
+            <div class="facts__row"><dt class="label">Currently</dt><dd>AWS Cloud Practitioner prep</dd></div>
+            <div class="facts__row"><dt class="label">Speaks</dt><dd>English &middot; Arabic</dd></div>
+          </dl>
         </div>
       </div>
+    </section>
+
+    <!-- BEHIND THE LENS: drag the photos around, click/tap to enlarge. js/lens.js -->
+    <section class="section lens" id="lens" aria-labelledby="lens-h">
+      <div class="container">
+        <div class="lens__head">
+          <h2 class="display lens__h" id="lens-h">Behind the lens.</h2>
+          <p class="lens__sub">When I'm not in a terminal, I'm behind a camera. These are from a summer trip through Iowa and the Midwest.</p>
+          <p class="label lens__hint"><span class="lens__hint-fine">Drag to explore &middot; Click to enlarge</span><span class="lens__hint-touch">Tap to enlarge</span></p>
+        </div>
+        <div class="lens__board" id="lens-board">
+        <button class="lens__card" type="button" data-full="assets/lens/01-bus.jpg" style="--x:3%;--y:5%;--w:28%;--r:-3deg">
+          <img src="assets/lens/thumbs/01-bus.jpg" alt="A lone passenger silhouetted inside a city bus, seen through its windows" width="800" height="402" loading="lazy" decoding="async" draggable="false">
+        </button>
+        <button class="lens__card" type="button" data-full="assets/lens/02-highway.jpg" style="--x:33%;--y:1%;--w:23%;--r:2.5deg">
+          <img src="assets/lens/thumbs/02-highway.jpg" alt="A white custom station wagon with blue and gold stripes speeding past cornfields" width="800" height="535" loading="lazy" decoding="async" draggable="false">
+        </button>
+        <button class="lens__card" type="button" data-full="assets/lens/03-garage.jpg" style="--x:58%;--y:6%;--w:21%;--r:-1.5deg">
+          <img src="assets/lens/thumbs/03-garage.jpg" alt="A red sedan in front of a weathered garage, blurred by motion and summer flowers" width="800" height="533" loading="lazy" decoding="async" draggable="false">
+        </button>
+        <button class="lens__card" type="button" data-full="assets/lens/06-reflection.jpg" style="--x:81%;--y:2%;--w:15%;--r:3deg">
+          <img src="assets/lens/thumbs/06-reflection.jpg" alt="Trees and sky reflected in rippling water, with reeds hanging into the frame" width="533" height="800" loading="lazy" decoding="async" draggable="false">
+        </button>
+        <button class="lens__card" type="button" data-full="assets/lens/04-band.jpg" style="--x:5%;--y:34%;--w:24%;--r:1.5deg">
+          <img src="assets/lens/thumbs/04-band.jpg" alt="A band on stage seen from behind through three backlit windows" width="800" height="533" loading="lazy" decoding="async" draggable="false">
+        </button>
+        <button class="lens__card" type="button" data-full="assets/lens/05-storm.jpg" style="--x:31%;--y:37%;--w:23%;--r:-2.5deg">
+          <img src="assets/lens/thumbs/05-storm.jpg" alt="Storm clouds over a highway interchange at dusk, headlights on the wet road" width="800" height="533" loading="lazy" decoding="async" draggable="false">
+        </button>
+        <button class="lens__card" type="button" data-full="assets/lens/07-shop.jpg" style="--x:56%;--y:35%;--w:23%;--r:2deg">
+          <img src="assets/lens/thumbs/07-shop.jpg" alt="A shop worker mopping the floor, seen through the store window at night" width="800" height="533" loading="lazy" decoding="async" draggable="false">
+        </button>
+        <button class="lens__card" type="button" data-full="assets/lens/08-porch.jpg" style="--x:24%;--y:67%;--w:22%;--r:-1.5deg">
+          <img src="assets/lens/thumbs/08-porch.jpg" alt="A porch with an American flag on a tree-lined street, blurred from a passing car" width="800" height="533" loading="lazy" decoding="async" draggable="false">
+        </button>
+        <button class="lens__card" type="button" data-full="assets/lens/09-garden.jpg" style="--x:62%;--y:64%;--w:22%;--r:-2deg">
+          <img src="assets/lens/thumbs/09-garden.jpg" alt="Orange lilies framing a pond and a small footbridge in a garden" width="800" height="533" loading="lazy" decoding="async" draggable="false">
+        </button>
+        </div>
+      </div>
+      <dialog class="lightbox" id="lightbox" aria-label="Photo viewer" tabindex="-1">
+        <button class="lightbox__btn lightbox__close" type="button" data-act="close" aria-label="Close">&times;</button>
+        <button class="lightbox__btn lightbox__prev" type="button" data-act="prev" aria-label="Previous photo">&larr;</button>
+        <button class="lightbox__btn lightbox__next" type="button" data-act="next" aria-label="Next photo">&rarr;</button>
+        <figure class="lightbox__fig">
+          <img class="lightbox__img" id="lightbox-img" alt="">
+          <figcaption class="label lightbox__cap" id="lightbox-cap"></figcaption>
+        </figure>
+      </dialog>
     </section>
 
     <!-- SKILLS -->
@@ -188,7 +237,8 @@
   <script src="js/terminal.js?v=4" defer></script>
   <script src="js/hero.js?v=17" defer></script>
   <script src="js/work.js?v=18" defer></script>
-  <script src="js/reveal.js?v=2" defer></script>
+  <script src="js/reveal.js?v=4" defer></script>
   <script src="js/scroll.js?v=1" defer></script>
+  <script src="js/lens.js?v=2" defer></script>
 </body>
 </html>

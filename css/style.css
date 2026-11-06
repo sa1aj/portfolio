@@ -352,22 +352,27 @@ a.work__row:focus-visible { outline-offset: -2px; }
 
 /* About */
 .about { display: grid; gap: clamp(2.5rem, 6vw, 6rem); }
-@media (min-width: 960px) { .about { grid-template-columns: 1fr 1fr; align-items: start; } }
+/* Desktop: two columns of equal height. The right column spreads out so the
+   paragraph lines up with the top of the heading and the facts list with its bottom. */
+@media (min-width: 960px) {
+  .about { grid-template-columns: 1fr 1fr; align-items: stretch; }
+  .about__body { display: flex; flex-direction: column; justify-content: space-between; gap: 2.5rem; }
+}
 .about__h { max-width: 9ch; }
-.about__body .lead { font-size: clamp(1.1rem, 1.6vw, 1.4rem); line-height: 1.4; margin-bottom: 1.6rem; }
-.about__body .muted { font-size: .95rem; margin-bottom: 2.5rem; }
-.photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; }
-.photo { margin: 0; }
-.photo__frame {
-  aspect-ratio: 3 / 4; overflow: hidden;
-  background: var(--surface); border: 1px solid var(--border-strong);
+.about__body .lead { font-size: clamp(1.1rem, 1.6vw, 1.4rem); line-height: 1.45; margin-bottom: 0; }
+.about__body .facts { margin-top: 2.5rem; }
+@media (min-width: 960px) { .about__body .facts { margin-top: 0; } }
+/* Quick facts: mono label left, value right, hairline between rows. */
+.facts { margin: 0; border-top: 1px solid var(--border); }
+.facts__row {
+  display: grid; grid-template-columns: 9.5rem 1fr; gap: 1rem; align-items: baseline;
+  padding: .95rem 0; border-bottom: 1px solid var(--border);
 }
-.photo__frame img { width: 100%; height: 100%; object-fit: cover; }
-.photo figcaption { margin-top: .8rem; font-size: .6rem; color: var(--dim); }
-@media (max-width: 520px) {
-  .photos { grid-template-columns: 1fr 1fr; }
-  .photo:last-child { display: none; }
-}
+.facts dt { color: var(--dim); }
+.facts dd { margin: 0; font-size: .95rem; color: var(--text); }
+@media (max-width: 520px) { .facts__row { grid-template-columns: 7.2rem 1fr; } }
+/* Pull "Behind the lens" closer to About. */
+.about-sec { padding-bottom: clamp(3rem, 6vw, 5rem); }
 
 /* Skills */
 .skills { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
@@ -523,6 +528,87 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .pfoot a { text-decoration: none; }
 .pfoot a:hover { color: var(--text); }
 
+/* ============ Behind the lens (js/lens.js) ============ */
+/* A loose pile of photo cards. Desktop: absolutely placed on a 16:9 board
+   (--x/--y/--w in % of the board, --r tilt), draggable with the mouse.
+   Phones: a tilted two-column grid, tap to enlarge. */
+.lens { padding-top: 0; }
+.lens__head { margin-bottom: clamp(2rem, 4vw, 3.5rem); }
+.lens__h { font-size: clamp(2.4rem, 5vw, 4.6rem); margin-bottom: 1.2rem; }
+.lens__sub { color: var(--muted); font-size: .95rem; margin-bottom: .9rem; }
+.lens__hint { color: var(--dim); margin: 0; }
+.lens__hint-touch { display: none; }
+@media (hover: none) { .lens__hint-fine { display: none; } .lens__hint-touch { display: inline; } }
+
+.lens__board { position: relative; aspect-ratio: 16 / 9; max-width: 1500px; }
+.lens__card {
+  position: absolute; left: var(--x); top: var(--y); width: var(--w);
+  padding: 0; border: 0; background: var(--surface); border-radius: 6px; overflow: hidden;
+  rotate: var(--r); cursor: zoom-in;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 255, 255, .06);
+  transition: scale .45s cubic-bezier(.22, 1, .36, 1), rotate .45s cubic-bezier(.22, 1, .36, 1),
+              box-shadow .45s cubic-bezier(.22, 1, .36, 1);
+  touch-action: manipulation;
+}
+.lens__card img { width: 100%; height: auto; display: block; pointer-events: none; user-select: none; }
+:root[data-theme="light"] .lens__card { box-shadow: 0 10px 28px rgba(40, 30, 20, .18), 0 0 0 1px rgba(0, 0, 0, .06); }
+@media (hover: hover) and (pointer: fine) {
+  .lens__card { cursor: grab; }
+  .lens__card:hover { scale: 1.02; }
+}
+.lens__card.is-dragging {
+  cursor: grabbing; scale: 1.05; rotate: 0deg;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .08);
+  transition: scale .3s cubic-bezier(.22, 1, .36, 1), rotate .3s cubic-bezier(.22, 1, .36, 1), box-shadow .3s ease;
+}
+.lens__card:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+
+@media (max-width: 700px) {
+  .lens__board { aspect-ratio: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem .9rem; }
+  .lens__card { position: relative; left: auto; top: auto; width: auto; rotate: calc(var(--r) * .6); }
+  .lens__card:nth-child(4) { grid-row: span 2; }   /* the tall reflection photo */
+  .lens__card:nth-child(4) img { height: 100%; object-fit: cover; }
+}
+
+/* Lightbox: the page dims and the photo opens large in the centre. */
+.lightbox {
+  border: 0; padding: 0; background: transparent; color: #f3f1ee;
+  width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none;
+  display: grid; place-items: center;
+}
+.lightbox:not([open]) { display: none; }
+.lightbox:focus { outline: none; }
+.lightbox::backdrop { background: rgba(5, 5, 5, .86); }
+.lightbox[open] { animation: lb-in .4s cubic-bezier(.22, 1, .36, 1); }
+.lightbox[open]::backdrop { animation: lb-fade .4s ease; }
+.lightbox.is-closing { animation: lb-out .25s ease forwards; }
+.lightbox.is-closing::backdrop { animation: lb-fade .25s ease reverse forwards; }
+@keyframes lb-in { from { opacity: 0; scale: .96; } }
+@keyframes lb-out { to { opacity: 0; scale: .97; } }
+@keyframes lb-fade { from { opacity: 0; } }
+.lightbox__fig { margin: 0; display: grid; justify-items: center; gap: .9rem; }
+.lightbox__img {
+  max-width: min(88vw, 1400px); max-height: 80vh; max-height: 80dvh; width: auto; height: auto;
+  border-radius: 6px; box-shadow: 0 30px 80px rgba(0, 0, 0, .6);
+}
+.lightbox__cap { color: #9a9a9a; }
+.lightbox__btn {
+  position: fixed; display: grid; place-items: center; width: 44px; height: 44px;
+  border: 1px solid rgba(255, 255, 255, .18); border-radius: 999px;
+  background: rgba(20, 20, 20, .6); color: #f3f1ee; font: 400 1.2rem var(--sans); cursor: pointer;
+  transition: background-color .3s ease, border-color .3s ease;
+}
+.lightbox__btn:hover { background: rgba(60, 60, 60, .8); border-color: rgba(255, 255, 255, .4); }
+.lightbox__close { top: 1.1rem; right: 1.1rem; font-size: 1.5rem; }
+.lightbox__prev { left: 1.1rem; top: 50%; translate: 0 -50%; }
+.lightbox__next { right: 1.1rem; top: 50%; translate: 0 -50%; }
+@media (max-width: 700px) {
+  .lightbox__img { max-width: 94vw; }
+  .lightbox__prev, .lightbox__next { top: auto; bottom: 1.2rem; translate: none; }
+  .lightbox__prev { left: calc(50% - 54px); } .lightbox__next { right: calc(50% - 54px); }
+}
+html.lightbox-open { overflow: hidden; }
+
 /* ============ Scroll reveals (js/reveal.js) ============ */
 /* Hidden states only apply once the script has set up (html.reveal-ready). */
 .reveal-ready .rv {
@@ -537,5 +623,6 @@ a.work__row:focus-visible { outline-offset: -2px; }
   .preview, .preview img { transition: none; }
   .ptoc a, .nav::before, .nav::after, .pnav::before, .pnav::after { transition: none; }
   .hero__ctas .pill, .phero__ctas .pill { transition: none; }
+  .lens__card, .lightbox[open], .lightbox[open]::backdrop, .lightbox.is-closing, .lightbox.is-closing::backdrop { transition: none; animation: none; }
   .reveal-ready .rv { opacity: 1; transform: none; transition: none; }
 }
