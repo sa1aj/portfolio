@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-  <link rel="stylesheet" href="css/style.css?v=18">
+  <link rel="stylesheet" href="css/style.css?v=20">
   <script>
     (function () { try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {} })();
   </script>
@@ -18,6 +18,7 @@
 <body class="project">
   <a class="skip-link" href="#main">Skip to content</a>
 
+  <div class="progress" aria-hidden="true"><span class="progress__bar" id="progress"></span></div>
   <header class="pnav">
     <a class="label pnav__back" href="index.html#projects"><span aria-hidden="true">&larr;</span> Back to work</a>
     <a class="nav__logo" href="index.html" aria-label="Salah Yacoub, home">SY</a>
@@ -38,40 +39,51 @@
 
     <div class="pbody">
       <div class="container pgrid">
-        <section class="pblock" aria-labelledby="knightro-overview">
-          <h2 class="label pblock__h" id="knightro-overview">Overview</h2>
+        <nav class="ptoc" aria-label="Sections">
+          <ol>
+            <li><a href="#overview"><span class="ptoc__n">01</span>Overview</a></li>
+            <li><a href="#what-i-built"><span class="ptoc__n">02</span>What I built</a></li>
+            <li><a href="#security"><span class="ptoc__n">03</span>Security</a></li>
+            <li><a href="#challenges"><span class="ptoc__n">04</span>Challenges</a></li>
+            <li><a href="#what-i-learned"><span class="ptoc__n">05</span>What I learned</a></li>
+            <li><a href="#gallery"><span class="ptoc__n">06</span>Gallery</a></li>
+          </ol>
+        </nav>
+        <div class="pcontent">
+        <section class="pblock" id="overview" aria-labelledby="overview-h">
+          <h2 class="label pblock__h" id="overview-h"><span class="pblock__n">01</span>Overview</h2>
           <div class="pblock__body">
 <p>Knightro Tracker lets UCF students report mascot sightings in real time. Users snap a photo, a pin drops on the campus map, and it fades out after 20 minutes. Our team of four built it at Knight Hacks IX. The final version adds photo verification, daily bounties and a leaderboard, all in a black-and-gold pixel theme.</p>
           </div>
         </section>
-        <section class="pblock" aria-labelledby="knightro-what-i-built">
-          <h2 class="label pblock__h" id="knightro-what-i-built">What I built</h2>
+        <section class="pblock" id="what-i-built" aria-labelledby="what-i-built-h">
+          <h2 class="label pblock__h" id="what-i-built-h"><span class="pblock__n">02</span>What I built</h2>
           <div class="pblock__body">
 <p>I built the project's first backend as a serverless AWS stack:</p>
 <ul class="plist"><li><strong>API Gateway:</strong> an HTTP API (<code>knightro-api</code>) that was the public front door. It had <code>POST /sightings</code> and <code>GET /sightings</code> routes, with CORS configured so the browser could call it directly.</li><li><strong>AWS Lambda:</strong> two functions. <code>submit-sighting</code> validated incoming reports and saved them. <code>get-sightings</code> returned only reports from the last 20 minutes, which kept the map live and uncluttered.</li><li><strong>Amazon DynamoDB:</strong> a <code>KnightroSightings</code> table keyed by <code>sightingId</code>, in on-demand mode. You pay per request, so it costs nothing while idle, which suited a hackathon.</li></ul>
 <p>This version covered the app's core loop end to end: report a sighting, store it, and show recent sightings on the map.</p>
           </div>
         </section>
-        <section class="pblock pblock--security" aria-labelledby="knightro-security">
-          <h2 class="label pblock__h" id="knightro-security">Security</h2>
+        <section class="pblock pblock--security" id="security" aria-labelledby="security-h">
+          <h2 class="label pblock__h" id="security-h"><span class="pblock__n">03</span>Security</h2>
           <div class="pblock__body">
 <ul class="plist"><li>In my backend, every report was validated in Lambda before it was written to the database, so the API never trusted raw browser input.</li><li>CORS was configured on the API so the browser could call it.</li><li>In the final app my team shipped:<ul class="plist plist--sub"><li>Accounts are limited to UCF email domains, with sessions in secure HttpOnly cookies.</li><li>Uploaded photos are stripped of EXIF/GPS location data and expire after 24 hours.</li><li>A same-origin proxy keeps API tokens out of the browser.</li><li>Per-account rate limits apply.</li></ul></li></ul>
           </div>
         </section>
-        <section class="pblock" aria-labelledby="knightro-challenges">
-          <h2 class="label pblock__h" id="knightro-challenges">Challenges</h2>
+        <section class="pblock" id="challenges" aria-labelledby="challenges-h">
+          <h2 class="label pblock__h" id="challenges-h"><span class="pblock__n">04</span>Challenges</h2>
           <div class="pblock__body">
 <p>The biggest challenge was scope versus time. My AWS backend handled the core sighting features, but the team wanted much more within the hackathon: accounts, photo checks, bounties and leaderboards. A teammate rebuilt the backend on Supabase, a managed backend with built-in auth, database and storage, to ship those features faster. That replaced my original architecture.</p>
           </div>
         </section>
-        <section class="pblock" aria-labelledby="knightro-what-i-learned">
-          <h2 class="label pblock__h" id="knightro-what-i-learned">What I learned</h2>
+        <section class="pblock" id="what-i-learned" aria-labelledby="what-i-learned-h">
+          <h2 class="label pblock__h" id="what-i-learned-h"><span class="pblock__n">05</span>What I learned</h2>
           <div class="pblock__body">
 <ul class="plist"><li>How serverless pieces fit together: API Gateway handles the routing, Lambda runs the logic and DynamoDB stores the data.</li><li>Making architecture tradeoffs under a deadline. If I rebuilt it, I'd agree on backend scope as a team before writing code, so nobody's work gets overwritten.</li><li>I'd also add a DynamoDB TTL so expired sightings delete themselves automatically.</li></ul>
           </div>
         </section>
-        <section class="pblock pblock--gallery" aria-labelledby="knightro-gallery">
-          <h2 class="label pblock__h" id="knightro-gallery">Gallery</h2>
+        <section class="pblock pblock--gallery" id="gallery" aria-labelledby="gallery-h">
+          <h2 class="label pblock__h" id="gallery-h"><span class="pblock__n">06</span>Gallery</h2>
           <div class="gallery">
           <figure class="gallery__item gallery__item--wide">
             <a href="assets/projects/knightro/map.jpg" target="_blank" rel="noopener"><img src="assets/projects/knightro/map.jpg" alt="The live campus map" width="1600" height="921" loading="lazy" decoding="async"></a>
@@ -79,6 +91,7 @@
           </figure>
           </div>
         </section>
+        </div>
       </div>
     </div>
 
@@ -94,5 +107,6 @@
     <span>&copy; 2026 Salah Yacoub</span>
     <a href="index.html#contact">Get in touch &rarr;</a>
   </footer>
+  <script src="js/project.js?v=19" defer></script>
 </body>
 </html>

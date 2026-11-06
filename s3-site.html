@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-  <link rel="stylesheet" href="css/style.css?v=18">
+  <link rel="stylesheet" href="css/style.css?v=20">
   <script>
     (function () { try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {} })();
   </script>
@@ -18,6 +18,7 @@
 <body class="project">
   <a class="skip-link" href="#main">Skip to content</a>
 
+  <div class="progress" aria-hidden="true"><span class="progress__bar" id="progress"></span></div>
   <header class="pnav">
     <a class="label pnav__back" href="index.html#projects"><span aria-hidden="true">&larr;</span> Back to work</a>
     <a class="nav__logo" href="index.html" aria-label="Salah Yacoub, home">SY</a>
@@ -38,39 +39,50 @@
 
     <div class="pbody">
       <div class="container pgrid">
-        <section class="pblock" aria-labelledby="s3-site-overview">
-          <h2 class="label pblock__h" id="s3-site-overview">Overview</h2>
+        <nav class="ptoc" aria-label="Sections">
+          <ol>
+            <li><a href="#overview"><span class="ptoc__n">01</span>Overview</a></li>
+            <li><a href="#what-i-built"><span class="ptoc__n">02</span>What I built</a></li>
+            <li><a href="#security"><span class="ptoc__n">03</span>Security</a></li>
+            <li><a href="#challenges"><span class="ptoc__n">04</span>Challenges</a></li>
+            <li><a href="#what-i-learned"><span class="ptoc__n">05</span>What I learned</a></li>
+            <li><a href="#gallery"><span class="ptoc__n">06</span>Gallery</a></li>
+          </ol>
+        </nav>
+        <div class="pcontent">
+        <section class="pblock" id="overview" aria-labelledby="overview-h">
+          <h2 class="label pblock__h" id="overview-h"><span class="pblock__n">01</span>Overview</h2>
           <div class="pblock__body">
 <p>Most beginner AWS projects stop at "host a static site on S3." I wrapped the hosting layer in the controls used in production environments:</p>
 <ul class="plist"><li>a private origin</li><li>least-privilege access</li><li>full audit logging</li><li>automated threat detection with real-time alerts</li></ul>
           </div>
         </section>
-        <section class="pblock" aria-labelledby="s3-site-what-i-built">
-          <h2 class="label pblock__h" id="s3-site-what-i-built">What I built</h2>
+        <section class="pblock" id="what-i-built" aria-labelledby="what-i-built-h">
+          <h2 class="label pblock__h" id="what-i-built-h"><span class="pblock__n">02</span>What I built</h2>
           <div class="pblock__body">
 <ul class="plist"><li><strong>Private origin:</strong> an S3 bucket with all public access blocked, served only through CloudFront using Origin Access Control scoped to a single distribution.</li><li><strong>Encryption in transit:</strong> CloudFront redirects every HTTP request to HTTPS.</li><li><strong>Audit logging:</strong> CloudTrail captures management and data events, encrypted with a customer-managed KMS key and with log file validation for tamper detection.</li><li><strong>Detection and response:</strong> GuardDuty monitors the account. An EventBridge rule filtered to Medium/High severity sends findings to SNS as an email alert.</li></ul>
           </div>
         </section>
-        <section class="pblock pblock--security" aria-labelledby="s3-site-security">
-          <h2 class="label pblock__h" id="s3-site-security">Security</h2>
+        <section class="pblock pblock--security" id="security" aria-labelledby="security-h">
+          <h2 class="label pblock__h" id="security-h"><span class="pblock__n">03</span>Security</h2>
           <div class="pblock__body">
 <p>I wrote a custom IAM policy for my working user. It allows only <code>GetObject</code>, <code>PutObject</code>, <code>DeleteObject</code> and <code>ListBucket</code>, scoped to this bucket's ARN, with no wildcard actions or resources and no AdministratorAccess. To verify it, I confirmed that an out-of-scope action was denied.</p>
           </div>
         </section>
-        <section class="pblock" aria-labelledby="s3-site-challenges">
-          <h2 class="label pblock__h" id="s3-site-challenges">Challenges</h2>
+        <section class="pblock" id="challenges" aria-labelledby="challenges-h">
+          <h2 class="label pblock__h" id="challenges-h"><span class="pblock__n">04</span>Challenges</h2>
           <div class="pblock__body">
 <p>GuardDuty raised a real finding during development: <code>Policy:IAMUser/RootCredentialUsage</code>, meaning an API call had been made with root credentials. I traced it to leftover activity from initial setup. I then moved all ongoing work to the dedicated least-privilege IAM user and took root out of routine use.</p>
           </div>
         </section>
-        <section class="pblock" aria-labelledby="s3-site-what-i-learned">
-          <h2 class="label pblock__h" id="s3-site-what-i-learned">What I learned</h2>
+        <section class="pblock" id="what-i-learned" aria-labelledby="what-i-learned-h">
+          <h2 class="label pblock__h" id="what-i-learned-h"><span class="pblock__n">05</span>What I learned</h2>
           <div class="pblock__body">
 <p>Security controls only count if you verify them. Watching my own alert pipeline catch a real issue taught me more than any sample finding. Next, I want to rebuild the stack with Terraform so it's reproducible from a single <code>apply</code>.</p>
           </div>
         </section>
-        <section class="pblock pblock--gallery" aria-labelledby="s3-site-gallery">
-          <h2 class="label pblock__h" id="s3-site-gallery">Gallery</h2>
+        <section class="pblock pblock--gallery" id="gallery" aria-labelledby="gallery-h">
+          <h2 class="label pblock__h" id="gallery-h"><span class="pblock__n">06</span>Gallery</h2>
           <div class="gallery">
           <figure class="gallery__item gallery__item--wide">
             <a href="assets/projects/s3-site/static-website.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/static-website.jpg" alt="The live site, served through CloudFront" width="1600" height="925" loading="lazy" decoding="async"></a>
@@ -102,6 +114,7 @@
           </figure>
           </div>
         </section>
+        </div>
       </div>
     </div>
 
@@ -117,5 +130,6 @@
     <span>&copy; 2026 Salah Yacoub</span>
     <a href="index.html#contact">Get in touch &rarr;</a>
   </footer>
+  <script src="js/project.js?v=19" defer></script>
 </body>
 </html>

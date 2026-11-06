@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-  <link rel="stylesheet" href="css/style.css?v=18">
+  <link rel="stylesheet" href="css/style.css?v=20">
   <script>
     (function () { try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {} })();
   </script>
@@ -18,6 +18,7 @@
 <body class="project">
   <a class="skip-link" href="#main">Skip to content</a>
 
+  <div class="progress" aria-hidden="true"><span class="progress__bar" id="progress"></span></div>
   <header class="pnav">
     <a class="label pnav__back" href="index.html#projects"><span aria-hidden="true">&larr;</span> Back to work</a>
     <a class="nav__logo" href="index.html" aria-label="Salah Yacoub, home">SY</a>
@@ -38,38 +39,49 @@
 
     <div class="pbody">
       <div class="container pgrid">
-        <section class="pblock" aria-labelledby="portfolio-overview">
-          <h2 class="label pblock__h" id="portfolio-overview">Overview</h2>
+        <nav class="ptoc" aria-label="Sections">
+          <ol>
+            <li><a href="#overview"><span class="ptoc__n">01</span>Overview</a></li>
+            <li><a href="#what-i-built"><span class="ptoc__n">02</span>What I built</a></li>
+            <li><a href="#security"><span class="ptoc__n">03</span>Security</a></li>
+            <li><a href="#challenges"><span class="ptoc__n">04</span>Challenges</a></li>
+            <li><a href="#what-i-learned"><span class="ptoc__n">05</span>What I learned</a></li>
+            <li><a href="#gallery"><span class="ptoc__n">06</span>Gallery</a></li>
+          </ol>
+        </nav>
+        <div class="pcontent">
+        <section class="pblock" id="overview" aria-labelledby="overview-h">
+          <h2 class="label pblock__h" id="overview-h"><span class="pblock__n">01</span>Overview</h2>
           <div class="pblock__body">
 <p>This site is my entry for the AWS Builder Center student portfolio hackathon. It's built to feel cinematic while staying fast and easy to navigate. There's a hidden way in for curious visitors.</p>
           </div>
         </section>
-        <section class="pblock" aria-labelledby="portfolio-what-i-built">
-          <h2 class="label pblock__h" id="portfolio-what-i-built">What I built</h2>
+        <section class="pblock" id="what-i-built" aria-labelledby="what-i-built-h">
+          <h2 class="label pblock__h" id="what-i-built-h"><span class="pblock__n">02</span>What I built</h2>
           <div class="pblock__body">
 <ul class="plist"><li><strong>The hero line field:</strong> a canvas of flowing lines that warp around your cursor with a color glow. The lines fade out at the edges.</li><li><strong>SY-Cloud-Shell:</strong> a working in-browser terminal (press <code><code></code> or tap </code>&gt;_<code>) with commands like </code>help<code>, </code>whoami<code> and </code>ls projects`.</li><li><strong>A capture-the-flag challenge:</strong> visitors find a hidden encoded file and decode it (base64 → ROT13) to recover the flag. The site stores only a hash of the answer, so the flag can't be read from the source.</li><li><strong>Deployment:</strong> the code lives on GitHub and deploys automatically through AWS Amplify Hosting on every push.</li></ul>
           </div>
         </section>
-        <section class="pblock pblock--security" aria-labelledby="portfolio-security">
-          <h2 class="label pblock__h" id="portfolio-security">Security</h2>
+        <section class="pblock pblock--security" id="security" aria-labelledby="security-h">
+          <h2 class="label pblock__h" id="security-h"><span class="pblock__n">03</span>Security</h2>
           <div class="pblock__body">
 <ul class="plist"><li>I directed an AI coding agent (Claude Code, with the AWS Agent Toolkit) that had access to my AWS account. That access goes through a dedicated IAM user protected with MFA, not the root account.</li><li>I started on root to save time, then switched. That's the same lesson GuardDuty taught me on my S3 project.</li><li>I reviewed every file before pushing to a public repo to make sure no secrets were included.</li></ul>
           </div>
         </section>
-        <section class="pblock" aria-labelledby="portfolio-challenges">
-          <h2 class="label pblock__h" id="portfolio-challenges">Challenges</h2>
+        <section class="pblock" id="challenges" aria-labelledby="challenges-h">
+          <h2 class="label pblock__h" id="challenges-h"><span class="pblock__n">04</span>Challenges</h2>
           <div class="pblock__body">
 <p>My first attempt at a full redesign was one giant prompt, and it broke the site. I rolled back with git and rebuilt in small steps (layout, then the line field, then interactions), committing after each one. That's how it finally came together.</p>
           </div>
         </section>
-        <section class="pblock" aria-labelledby="portfolio-what-i-learned">
-          <h2 class="label pblock__h" id="portfolio-what-i-learned">What I learned</h2>
+        <section class="pblock" id="what-i-learned" aria-labelledby="what-i-learned-h">
+          <h2 class="label pblock__h" id="what-i-learned-h"><span class="pblock__n">05</span>What I learned</h2>
           <div class="pblock__body">
 <ul class="plist"><li>How to direct an AI agent well: specific instructions, small steps, review everything and keep a rollback point.</li><li>How Amplify packages what I built by hand on my S3 project (storage, CDN, HTTPS) into a managed workflow.</li></ul>
           </div>
         </section>
-        <section class="pblock pblock--gallery" aria-labelledby="portfolio-gallery">
-          <h2 class="label pblock__h" id="portfolio-gallery">Gallery</h2>
+        <section class="pblock pblock--gallery" id="gallery" aria-labelledby="gallery-h">
+          <h2 class="label pblock__h" id="gallery-h"><span class="pblock__n">06</span>Gallery</h2>
           <div class="gallery">
           <figure class="gallery__item gallery__item--wide">
             <a href="assets/projects/portfolio/hero.jpg" target="_blank" rel="noopener"><img src="assets/projects/portfolio/hero.jpg" alt="The hero line field" width="1600" height="918" loading="lazy" decoding="async"></a>
@@ -77,6 +89,7 @@
           </figure>
           </div>
         </section>
+        </div>
       </div>
     </div>
 
@@ -92,5 +105,6 @@
     <span>&copy; 2026 Salah Yacoub</span>
     <a href="index.html#contact">Get in touch &rarr;</a>
   </footer>
+  <script src="js/project.js?v=19" defer></script>
 </body>
 </html>

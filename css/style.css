@@ -113,14 +113,35 @@ kbd {
   position: sticky; top: 0; z-index: 30;
   display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem;
   height: var(--nav-h); padding-inline: var(--pad);
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  transition: background-color .3s ease, border-color .3s ease;
 }
-/* At the very top of the page (set by js/hero.js) the nav is see-through so the
-   lines run up under it and fade out, like the reference. It turns solid as soon
-   as you scroll. Without JS it simply stays solid. */
-.nav--clear { background-color: transparent; border-bottom-color: transparent; }
+/* Fade mask (progressive blur), like the reference: no solid bar. Content scrolling
+   up under the nav stays visible but gets blurrier and darker toward the top edge.
+   Two layers behind the nav links blur whatever is behind them (backdrop-filter);
+   mask-image fades each layer out downward, so the blur dissolves to nothing
+   ~60px below the nav instead of ending at a hard edge.
+   ::before = light blur + soft tint, reaching furthest down
+   ::after  = heavier blur, only near the very top                              */
+.nav::before, .nav::after, .pnav::before, .pnav::after {
+  content: ""; position: absolute; inset: 0 0 -64px 0; z-index: -1; pointer-events: none;
+  transition: opacity .3s ease;
+}
+.nav::before, .pnav::before {
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--bg) 72%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 40%, transparent) 55%,
+    transparent 100%);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
+}
+.nav::after, .pnav::after {
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 55%);
+          mask-image: linear-gradient(to bottom, #000 0%, transparent 55%);
+}
+/* At the very top of the home page (set by js/hero.js) there's nothing under the
+   nav yet, so the effect is off and the hero lines run up to the top on their own. */
+.nav--clear::before, .nav--clear::after { opacity: 0; }
 .nav__logo {
   justify-self: start;
   font: 700 1.3rem var(--sans); letter-spacing: -.04em; text-decoration: none; color: var(--text);
@@ -389,7 +410,7 @@ a.work__row:focus-visible { outline-offset: -2px; }
 
 /* ============ Project pages (knightro.html, s3-site.html, portfolio.html) ============ */
 .pnav {
-  position: absolute; inset: 0 0 auto 0; z-index: 10;
+  position: fixed; inset: 0 0 auto 0; z-index: 30;
   display: flex; justify-content: space-between; align-items: center;
   height: 88px; padding-inline: var(--pad);
 }
@@ -408,9 +429,29 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .phero__ctas { display: flex; flex-wrap: wrap; gap: .9rem; }
 
 .pbody { padding: clamp(4rem, 8vw, 7rem) 0; }
-.pgrid { display: grid; gap: clamp(3.5rem, 7vw, 5.5rem) clamp(2.5rem, 6vw, 6rem); }
-@media (min-width: 960px) { .pgrid { grid-template-columns: 1fr 1fr; } }
-.pblock__h { margin-bottom: 1.6rem; }
+/* Scroll progress bar (project pages only) */
+.progress { position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 40; pointer-events: none;
+  background: color-mix(in srgb, var(--text) 8%, transparent); }
+.progress__bar { display: block; height: 100%; background: var(--grad);
+  transform: scaleX(0); transform-origin: 0 50%; will-change: transform; }
+
+/* Sticky section list on the left + one content column */
+.pgrid { display: grid; gap: 3rem; }
+.ptoc { display: none; }
+@media (min-width: 960px) {
+  .pgrid { grid-template-columns: minmax(170px, 230px) minmax(0, 1fr); gap: clamp(3rem, 6vw, 6rem); }
+  .ptoc { display: block; }
+  .ptoc ol { position: sticky; top: 130px; display: grid; gap: .95rem; }
+  .ptoc a { display: flex; gap: 1.1rem; text-decoration: none; color: var(--dim); font-size: .95rem; transition: color .25s ease; }
+  .ptoc a:hover { color: var(--muted); }
+  .ptoc a.is-active { color: var(--text); }
+  .ptoc__n { font-family: var(--mono); font-size: .8rem; padding-top: .12em; min-width: 1.6em; }
+}
+.pcontent { display: grid; gap: clamp(4rem, 8vw, 6.5rem); max-width: 860px; }
+.pblock { scroll-margin-top: 120px; }
+.pblock__h { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.8rem; }
+.pblock__n { color: var(--text); }
+.pblock__h::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 .pblock--security .pblock__h { color: var(--orange); }
 .pblock__body { font-size: clamp(1rem, 1.25vw, 1.12rem); line-height: 1.6; }
 .pblock__body p { max-width: 60ch; }
@@ -426,7 +467,7 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .plist--sub { gap: .55rem; margin: .8rem 0 0; }
 .plist--sub > li { border-left-color: var(--border-strong) !important; color: var(--muted); }
 
-.pblock--gallery { grid-column: 1 / -1; }
+
 .gallery { display: grid; gap: 1.1rem; grid-auto-flow: dense; }
 @media (min-width: 760px) { .gallery { grid-template-columns: 1fr 1fr; } }
 .gallery__item { margin: 0; }
@@ -451,4 +492,5 @@ a.work__row:focus-visible { outline-offset: -2px; }
   .terminal { transition: none; }
   .work__row, .work__meta, .work__meta b, .work__desc { transition: none; }
   .preview, .preview img { transition: none; }
+  .ptoc a, .nav::before, .nav::after, .pnav::before, .pnav::after { transition: none; }
 }
