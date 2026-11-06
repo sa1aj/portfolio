@@ -548,7 +548,7 @@ a.work__row:focus-visible { outline-offset: -2px; }
 /* ============ Behind the lens (js/lens.js) ============ */
 /* A loose pile of photo cards. Desktop: absolutely placed on a 16:9 board
    (--x/--y/--w in % of the board, --r tilt), draggable with the mouse.
-   Phones: a tilted two-column grid, tap to enlarge. */
+   Phones: a tilted two-column grid; drag with a finger, tap to enlarge. */
 .lens { padding-top: 0; }
 .lens__head { margin-bottom: clamp(2rem, 4vw, 3.5rem); }
 .lens__h { font-size: clamp(2.4rem, 5vw, 4.6rem); margin-bottom: 1.2rem; }
@@ -565,7 +565,8 @@ a.work__row:focus-visible { outline-offset: -2px; }
   box-shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 255, 255, .06);
   transition: scale .45s cubic-bezier(.22, 1, .36, 1), rotate .45s cubic-bezier(.22, 1, .36, 1),
               box-shadow .45s cubic-bezier(.22, 1, .36, 1);
-  touch-action: manipulation;
+  touch-action: pan-y;   /* vertical swipes scroll the page; sideways ones drag (js/lens.js) */
+  -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
 }
 .lens__card img { width: 100%; height: auto; display: block; pointer-events: none; user-select: none; }
 :root[data-theme="light"] .lens__card { box-shadow: 0 10px 28px rgba(40, 30, 20, .18), 0 0 0 1px rgba(0, 0, 0, .06); }
@@ -595,6 +596,7 @@ a.work__row:focus-visible { outline-offset: -2px; }
 }
 .lightbox:not([open]) { display: none; }
 .lightbox:focus { outline: none; }
+.lightbox { touch-action: none; }   /* sideways swipes step through photos (js/lens.js) */
 .lightbox::backdrop { background: rgba(5, 5, 5, .86); }
 .lightbox[open] { animation: lb-in .4s cubic-bezier(.22, 1, .36, 1); }
 .lightbox[open]::backdrop { animation: lb-fade .4s ease; }

@@ -1,10 +1,13 @@
 /* "Behind the lens" photo pile (home page).
  * - Mouse/trackpad: grab any photo and drag it around the board; it comes to the
  *   front and straightens while held. A click without dragging enlarges it.
- * - Touch: tap to enlarge (no dragging, so swiping over the photos still scrolls).
+ * - Touch: same, with a finger. Cards use touch-action: pan-y, so a swipe that
+ *   starts up/down still scrolls the page; one that starts sideways picks the
+ *   photo up, and it then follows the finger in any direction. Tap enlarges.
  * - Keyboard: each photo is a button (Enter/Space enlarges).
  * - Enlarged view: a <dialog> with a dimmed backdrop; close with x, Esc or a click
- *   outside the photo; arrows (buttons or keys) step through the photos.
+ *   outside the photo; arrows (buttons or keys) or a sideways swipe step
+ *   through the photos.
  */
 (function () {
   "use strict";
@@ -15,22 +18,20 @@
   var cards = Array.prototype.slice.call(board.querySelectorAll(".lens__card"));
   var img = document.getElementById("lightbox-img");
   var cap = document.getElementById("lightbox-cap");
-  var fine = window.matchMedia("(hover: hover) and (pointer: fine)");
+  var phone = window.matchMedia("(max-width: 700px)");   // grid layout (see style.css)
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
   var top = cards.length, current = -1;
 
-  // ---------- Dragging (mouse/trackpad only) ----------
+  // ---------- Dragging (mouse, trackpad or finger) ----------
   var drag = null;      // { card, id, sx, sy, ox, oy, moved }
   cards.forEach(function (card, i) {
     card.dataset.dx = "0"; card.dataset.dy = "0";
     card.style.zIndex = i + 1;
 
     card.addEventListener("pointerdown", function (e) {
-      if (e.pointerType === "touch" || !fine.matches || e.button !== 0) return;
-      if (window.innerWidth <= 700) return;   // phone layout is a grid: tap only
-      e.preventDefault();                      // no text selection / native image drag
+      if (e.button !== 0 || drag) return;
+      if (e.pointerType === "mouse") e.preventDefault();   // no text selection / native image drag
       card.setPointerCapture(e.pointerId);
-      card.style.zIndex = ++top;
       drag = { card: card, id: e.pointerId, sx: e.clientX, sy: e.clientY,
                ox: +card.dataset.dx, oy: +card.dataset.dy, moved: false };
     });
@@ -38,7 +39,7 @@
       if (!drag || drag.card !== card || e.pointerId !== drag.id) return;
       var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
       if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 5) return;   // still a click
-      if (!drag.moved) { drag.moved = true; card.classList.add("is-dragging"); }
+      if (!drag.moved) { drag.moved = true; card.style.zIndex = ++top; card.classList.add("is-dragging"); }
       var p = clampToBoard(card, drag.ox + dx, drag.oy + dy);
       card.dataset.dx = p.x; card.dataset.dy = p.y;
       card.style.translate = p.x + "px " + p.y + "px";
@@ -69,11 +70,13 @@
              y: Math.round(Math.max(minY, Math.min(maxY, y))) };
   }
 
-  // Phone layout is a plain grid: drop any drag offsets when the screen gets narrow.
-  window.addEventListener("resize", function () {
-    if (window.innerWidth > 700) return;
+  // Pile (desktop) and grid (phone) place the cards differently, so offsets from one
+  // layout mean nothing in the other: reset them when the layout switches.
+  function resetOffsets() {
     cards.forEach(function (c) { c.dataset.dx = c.dataset.dy = "0"; c.style.translate = ""; });
-  });
+  }
+  if (phone.addEventListener) phone.addEventListener("change", resetOffsets);
+  else if (phone.addListener) phone.addListener(resetOffsets);
 
   // ---------- Enlarged view ----------
   function show(i) {
@@ -120,6 +123,25 @@
     }
     if (e.target !== img) close();   // click anywhere outside the photo
   });
+  // Touch: swipe left/right on the enlarged view to step through the photos.
+  var swipe = null;
+  box.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "touch") swipe = { id: e.pointerId, x: e.clientX, y: e.clientY };
+  });
+  box.addEventListener("pointerup", function (e) {
+    if (!swipe || e.pointerId !== swipe.id) return;
+    var dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+    swipe = null;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      box.dataset.swiped = "1";               // swallow the click that may follow
+      show(current + (dx < 0 ? 1 : -1));
+    }
+  });
+  box.addEventListener("pointercancel", function () { swipe = null; });
+  box.addEventListener("click", function (e) {
+    if (box.dataset.swiped) { delete box.dataset.swiped; e.stopImmediatePropagation(); }
+  }, true);
+
   box.addEventListener("keydown", function (e) {
     if (e.key === "ArrowRight") { e.preventDefault(); show(current + 1); }
     else if (e.key === "ArrowLeft") { e.preventDefault(); show(current - 1); }
