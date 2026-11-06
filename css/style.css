@@ -512,9 +512,18 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .pfoot a { text-decoration: none; }
 .pfoot a:hover { color: var(--text); }
 
+/* ============ Scroll reveals (js/reveal.js) ============ */
+/* Hidden states only apply once the script has set up (html.reveal-ready). */
+.reveal-ready .rv {
+  opacity: 0; transform: translateY(26px);
+  transition: opacity .9s cubic-bezier(.2, .7, .2, 1), transform .9s cubic-bezier(.2, .7, .2, 1);
+}
+.reveal-ready .rv.is-in { opacity: 1; transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .terminal { transition: none; }
   .work__row, .work__meta, .work__meta b, .work__desc { transition: none; }
   .preview, .preview img { transition: none; }
   .ptoc a, .nav::before, .nav::after, .pnav::before, .pnav::after { transition: none; }
+  .reveal-ready .rv { opacity: 1; transform: none; transition: none; }
 }
