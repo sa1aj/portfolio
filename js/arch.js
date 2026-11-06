@@ -1,7 +1,11 @@
 /* Skills architecture map (home page).
  * - Carousel: one project per slide in a horizontal scroll-snap track. Swipe
  *   (touch or trackpad), click a dot, or use the arrow keys on the focused track.
- *   The dot for the current slide lights up.
+ * - Dots: a chrome "bubble" sits on the current dot and is driven straight from
+ *   the scroll position, so it moves in step with the slide (and follows a
+ *   finger mid-swipe). Between dots its front edge reaches ahead, it stretches
+ *   and swells a little, then its back edge catches up, like a bubble passing
+ *   from one dot to the next.
  * - Wires: for every hop in a lane (and the CloudTrail -> GuardDuty link, desktop
  *   only), a smooth curve is drawn in the slide's SVG between the two nodes'
  *   facing edges, with its label (HTTPS, OAC, ...) at the curve's midpoint.
@@ -192,18 +196,45 @@
     if (i === current) return;
     var prev = S[current];
     current = i;
-    dots.forEach(function (d, k) { d.setAttribute("aria-current", k === i ? "true" : "false"); });
+    markDot(i);
     reset(prev);
     if (inView) play(S[current]);
   }
-  var settle;
+  function markDot(i) {
+    dots.forEach(function (d, k) { d.setAttribute("aria-current", k === i ? "true" : "false"); });
+  }
+
+  // ---------- Bubble indicator ----------
+  var bubble = document.createElement("span");
+  bubble.className = "arch__bubble"; bubble.setAttribute("aria-hidden", "true");
+  dotsEl.appendChild(bubble);
+  var REST_W = 24, DOT_H = 8;
+  function progress() { return track.scrollLeft / Math.max(1, track.clientWidth); }
+  function paintBubble() {
+    var n = dots.length, p = Math.max(0, Math.min(n - 1, progress()));
+    var i = Math.min(n - 2, Math.floor(p)), f = p - i;
+    var a = dots[i].offsetLeft + dots[i].offsetWidth / 2;
+    var b = dots[i + 1].offsetLeft + dots[i + 1].offsetWidth / 2;
+    // one edge leads (ease-out), the other trails (ease-in); going left or right
+    // the edge facing the move is always the quick one.
+    var quick = 1 - Math.pow(1 - f, 3), slow = f * f * f;
+    var lo = a + (b - a) * slow, hi = a + (b - a) * quick;
+    var swell = Math.sin(Math.PI * f);              // 0 at a dot, 1 halfway
+    var h = DOT_H * (1 + 0.6 * swell);
+    var w = (hi - lo) + REST_W - 4 * swell;        // a touch rounder while stretched
+    bubble.style.width = w + "px";
+    bubble.style.height = h + "px";
+    bubble.style.transform = "translate(" + ((lo + hi) / 2 - w / 2) + "px, -50%)";
+    var near = Math.round(p);
+    dots.forEach(function (d, k) { d.classList.toggle("is-near", k === near); });
+  }
+  var settle, paintQueued = false;
   track.addEventListener("scroll", function () {
+    if (!paintQueued) { paintQueued = true; requestAnimationFrame(function () { paintQueued = false; paintBubble(); }); }
     clearTimeout(settle);
-    settle = setTimeout(function () {
-      setCurrent(Math.round(track.scrollLeft / Math.max(1, track.clientWidth)));
-    }, 90);
+    settle = setTimeout(function () { setCurrent(Math.round(progress())); }, 90);
   }, { passive: true });
-  dots.forEach(function (d, k) { d.addEventListener("click", function () { go(k, true); }); });
+  dots.forEach(function (d, k) { d.addEventListener("click", function () { markDot(k); go(k, true); }); });
   track.addEventListener("keydown", function (e) {
     if (e.key === "ArrowRight") { e.preventDefault(); go(current + 1, true); }
     else if (e.key === "ArrowLeft") { e.preventDefault(); go(current - 1, true); }
@@ -234,12 +265,13 @@
 
   // Redraw on size changes (and once fonts settle widths).
   var raf;
-  function schedule() { cancelAnimationFrame(raf); raf = requestAnimationFrame(drawAll); }
+  function schedule() { cancelAnimationFrame(raf); raf = requestAnimationFrame(function () { drawAll(); paintBubble(); }); }
   if ("ResizeObserver" in window) slides.forEach(function (s) { new ResizeObserver(schedule).observe(s.querySelector(".arch__stage")); });
   window.addEventListener("resize", schedule);
   if (phone.addEventListener) phone.addEventListener("change", function () { reset(S[current]); schedule(); if (inView) setTimeout(function () { play(S[current]); }, 50); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
   drawAll();
+  paintBubble();
   if (reduce.matches) S.forEach(litAll);
   checkView();
 })();

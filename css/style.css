@@ -523,14 +523,23 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .via.is-lit { color: var(--text); border-color: color-mix(in srgb, var(--text) 40%, transparent); }
 
 /* Dots: one per slide; the current one stretches and turns chrome. */
-.arch__dots { display: flex; justify-content: center; gap: .55rem; margin-top: 1.4rem; }
-.arch__dots button {
-  width: 8px; height: 8px; padding: 0; border: 0; border-radius: 999px; cursor: pointer;
-  background: color-mix(in srgb, var(--text) 22%, transparent);
-  transition: width .45s cubic-bezier(.22, 1, .36, 1), background-color .45s ease;
+.arch__dots {   /* dots with spacing wide enough for the bubble to rest on each */
+  position: relative; display: flex; justify-content: center; align-items: center;
+  gap: 1.5rem; height: 20px; margin-top: 1.3rem;
 }
+.arch__dots button {
+  position: relative; width: 8px; height: 8px; padding: 0; border: 0; border-radius: 999px; cursor: pointer;
+  background: color-mix(in srgb, var(--text) 22%, transparent);
+  transition: background-color .3s ease;
+}
+.arch__dots button::after { content: ""; position: absolute; inset: -8px; }   /* bigger tap target */
 .arch__dots button:hover { background-color: color-mix(in srgb, var(--text) 45%, transparent); }
-.arch__dots button[aria-current="true"] { width: 26px; background: var(--chrome-text); }
+/* the bubble: positioned and stretched every frame by js/arch.js */
+.arch__bubble {
+  position: absolute; left: 0; top: 50%; width: 24px; height: 8px; border-radius: 999px;
+  background: var(--chrome-text); pointer-events: none; will-change: transform, width, height;
+  box-shadow: 0 0 10px -2px var(--arch-glow, rgba(226, 230, 240, .5));
+}
 
 @media (max-width: 1000px) {
   .arch__lane { grid-template-columns: 1fr; gap: .8rem; }
@@ -813,7 +822,7 @@ html.lightbox-open { overflow: hidden; }
   .preview, .preview img { transition: none; }
   .ptoc a, .nav::before, .nav::after, .pnav::before, .pnav::after { transition: none; }
   .hero__ctas .pill, .phero__ctas .pill { transition: none; }
-  .fnode, .fnode i, .via, .arch__dots button { transition: none; }
+  .fnode, .fnode i, .via, .arch__dots button { transition: none; }   /* the bubble just jumps (scroll is instant) */
   .hero__ctas .pill--grad:hover, .phero__ctas .pill--grad:hover { transition: none; }   /* no light sweep */
   .lens__card, .lightbox[open], .lightbox[open]::backdrop, .lightbox.is-closing, .lightbox.is-closing::backdrop { transition: none; animation: none; }
   .reveal-ready .rv { opacity: 1; transform: none; transition: none; }
