@@ -11,7 +11,7 @@
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   var BLOCKS = [
-    ".work > li", ".about__body > p", ".facts", ".lens__head > p", ".lens__board", ".arch__group", ".stack",
+    ".work > li", ".about__body > p", ".facts", ".lens__head > p", ".lens__board", ".arch", ".stack",
     ".contact__links li", ".contact__base",
     ".phero__tags", ".phero__sum", ".phero__ctas",
     ".pblock__body", ".gallery__item", ".pnext .label", ".pfoot"

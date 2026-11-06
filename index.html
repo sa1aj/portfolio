@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
   <!-- ?v= forces browsers to fetch the new file instead of a cached old one -->
-  <link rel="stylesheet" href="css/style.css?v=41">
+  <link rel="stylesheet" href="css/style.css?v=44">
   <script>
     // Apply saved theme before paint to avoid a flash.
     (function () {
@@ -176,33 +176,65 @@
       </dialog>
     </section>
 
-    <!-- SKILLS: the AWS services I've used, drawn as the pipelines I built. Hover a lane to trace it. -->
-    <section class="section section--band" id="skills" aria-labelledby="skills-h">
+    <!-- SKILLS: the AWS services I've used, drawn as the pipelines I built.
+         One project per slide (swipe / dots / arrow keys); wires and the light-up are drawn by js/arch.js. -->
+    <section class="section" id="skills" aria-labelledby="skills-h">
       <div class="container">
         <div class="arch__head">
           <h2 class="display arch__h" id="skills-h">Skills, wired up.</h2>
           <p class="arch__sub">Every AWS service here is one I've configured in a real project, drawn the way the data actually flows.</p>
         </div>
-        <div class="arch">
-          <article class="arch__group">
-            <header class="arch__ghead"><a class="label arch__gname" href="s3-site.html"><b>01</b> Secure photography site <span aria-hidden="true">&#8599;</span></a><p class="label arch__note">IAM &middot; least-privilege, scoped to the bucket ARN</p></header>
-            <div class="arch__lane"><p class="label arch__lname">Delivery</p>
-              <ol class="arch__chain" aria-label="Delivery: a visitor reaches CloudFront over HTTPS, which reads the private S3 bucket through Origin Access Control"><li class="arch__node arch__node--ext"><b>Visitor</b></li><li class="arch__node" data-via="HTTPS"><b>CloudFront</b><small>HTTPS only</small></li><li class="arch__node" data-via="OAC"><b>S3</b><small>private bucket</small></li></ol></div>
-            <div class="arch__lane"><p class="label arch__lname">Audit</p>
-              <ol class="arch__chain" aria-label="Audit: account API activity is recorded by CloudTrail, encrypted with a customer-managed KMS key and stored in an S3 log bucket"><li class="arch__node arch__node--ext"><b>API activity</b></li><li class="arch__node" data-via="record"><b>CloudTrail</b><small>log file validation</small></li><li class="arch__node" data-via="encrypt"><b>KMS</b><small>customer-managed key</small></li><li class="arch__node" data-via="store"><b>S3</b><small>log bucket</small></li></ol></div>
-            <div class="arch__lane"><p class="label arch__lname">Detection</p>
-              <ol class="arch__chain" aria-label="Detection: GuardDuty findings go to an EventBridge rule for Medium and High severity, which publishes to SNS and emails me"><li class="arch__node"><b>GuardDuty</b><small>threat findings</small></li><li class="arch__node" data-via="finding"><b>EventBridge</b><small>Medium+ rule</small></li><li class="arch__node" data-via="match"><b>SNS</b><small>topic</small></li><li class="arch__node arch__node--ext" data-via="email"><b>Inbox</b></li></ol></div>
+        <div class="arch" id="arch">
+        <div class="arch__track" id="arch-track" tabindex="0" aria-roledescription="carousel" aria-label="Project architectures, 3 slides. Use the arrow keys to switch.">
+          <article class="arch__slide" aria-roledescription="slide" aria-label="1 of 3: Secure photography site">
+            <header class="arch__ghead">
+              <p class="label arch__num">01 <span>/ 03</span></p>
+              <h3 class="arch__title"><a href="s3-site.html">Secure photography site <span aria-hidden="true">&#8599;</span></a></h3>
+              <p class="label arch__note">IAM &middot; least-privilege, scoped to the bucket ARN</p>
+            </header>
+            <div class="arch__stage">
+              <svg class="arch__wires" aria-hidden="true"></svg>
+              <div class="arch__vias" aria-hidden="true"></div>
+              <div class="arch__lane"><p class="arch__lname">Delivery</p>
+                <ol class="arch__chain" aria-label="Delivery: a visitor reaches CloudFront over HTTPS, which reads the private S3 bucket through Origin Access Control"><li class="fnode fnode--ext" data-id="v"><b>Visitor</b></li><li class="fnode" data-id="cf" data-via="HTTPS"><i aria-hidden="true"></i><span><b>CloudFront</b><small>HTTPS only</small></span></li><li class="fnode" data-id="s3" data-via="OAC"><i aria-hidden="true"></i><span><b>S3</b><small>private bucket</small></span></li></ol></div>
+              <div class="arch__lane"><p class="arch__lname">Audit</p>
+                <ol class="arch__chain" aria-label="Audit: account API activity is recorded by CloudTrail, encrypted with a customer-managed KMS key and stored in an S3 log bucket"><li class="fnode fnode--ext" data-id="api"><b>API activity</b></li><li class="fnode" data-id="ct" data-via="record"><i aria-hidden="true"></i><span><b>CloudTrail</b><small>log file validation</small></span></li><li class="fnode" data-id="kms" data-via="encrypt"><i aria-hidden="true"></i><span><b>KMS</b><small>customer-managed key</small></span></li><li class="fnode" data-id="logs" data-via="store"><i aria-hidden="true"></i><span><b>S3</b><small>log bucket</small></span></li></ol></div>
+              <div class="arch__lane"><p class="arch__lname">Detection</p>
+                <ol class="arch__chain" aria-label="Detection: GuardDuty analyzes CloudTrail events; its findings go to an EventBridge rule for Medium and High severity, which publishes to SNS and emails me"><li class="fnode" data-id="gd" data-from="ct" data-from-via="analyze"><i aria-hidden="true"></i><span><b>GuardDuty</b><small>threat findings</small></span></li><li class="fnode" data-id="eb" data-via="finding"><i aria-hidden="true"></i><span><b>EventBridge</b><small>Medium+ rule</small></span></li><li class="fnode" data-id="sns" data-via="match"><i aria-hidden="true"></i><span><b>SNS</b><small>topic</small></span></li><li class="fnode fnode--ext" data-id="inbox" data-via="email"><b>Inbox</b></li></ol></div>
+            </div>
           </article>
-          <article class="arch__group">
-            <header class="arch__ghead"><a class="label arch__gname" href="knightro.html"><b>02</b> Knightro Tracker <span aria-hidden="true">&#8599;</span></a><p class="label arch__note">Knight Hacks IX &middot; serverless, $0 when idle</p></header>
-            <div class="arch__lane"><p class="label arch__lname">Request</p>
-              <ol class="arch__chain" aria-label="Request: the browser calls an API Gateway HTTP API, which invokes Lambda functions that read and write DynamoDB"><li class="arch__node arch__node--ext"><b>Browser</b></li><li class="arch__node" data-via="HTTPS"><b>API Gateway</b><small>HTTP API · CORS</small></li><li class="arch__node" data-via="invoke"><b>Lambda</b><small>validate · last 20 min</small></li><li class="arch__node" data-via="read/write"><b>DynamoDB</b><small>on-demand</small></li></ol></div>
+          <article class="arch__slide" aria-roledescription="slide" aria-label="2 of 3: Knightro Tracker">
+            <header class="arch__ghead">
+              <p class="label arch__num">02 <span>/ 03</span></p>
+              <h3 class="arch__title"><a href="knightro.html">Knightro Tracker <span aria-hidden="true">&#8599;</span></a></h3>
+              <p class="label arch__note">Knight Hacks IX &middot; serverless, $0 when idle</p>
+            </header>
+            <div class="arch__stage">
+              <svg class="arch__wires" aria-hidden="true"></svg>
+              <div class="arch__vias" aria-hidden="true"></div>
+              <div class="arch__lane"><p class="arch__lname">Request</p>
+                <ol class="arch__chain" aria-label="Request: the browser calls an API Gateway HTTP API, which invokes Lambda functions that read and write DynamoDB"><li class="fnode fnode--ext" data-id="b"><b>Browser</b></li><li class="fnode" data-id="apigw" data-via="HTTPS"><i aria-hidden="true"></i><span><b>API Gateway</b><small>HTTP API · CORS</small></span></li><li class="fnode" data-id="fn" data-via="invoke"><i aria-hidden="true"></i><span><b>Lambda</b><small>validate · last 20 min</small></span></li><li class="fnode" data-id="ddb" data-via="read/write"><i aria-hidden="true"></i><span><b>DynamoDB</b><small>on-demand</small></span></li></ol></div>
+            </div>
           </article>
-          <article class="arch__group">
-            <header class="arch__ghead"><a class="label arch__gname" href="portfolio.html"><b>03</b> This portfolio <span aria-hidden="true">&#8599;</span></a><p class="label arch__note">IAM &middot; MFA-protected agent user, never root</p></header>
-            <div class="arch__lane"><p class="label arch__lname">Deploy</p>
-              <ol class="arch__chain" aria-label="Deploy: a push to GitHub triggers an automatic Amplify Hosting deploy, served to you over HTTPS"><li class="arch__node arch__node--ext"><b>GitHub</b><small>sa1aj/portfolio</small></li><li class="arch__node" data-via="push"><b>Amplify Hosting</b><small>auto-deploy</small></li><li class="arch__node arch__node--ext" data-via="HTTPS"><b>You</b><small>right now</small></li></ol></div>
+          <article class="arch__slide" aria-roledescription="slide" aria-label="3 of 3: This portfolio">
+            <header class="arch__ghead">
+              <p class="label arch__num">03 <span>/ 03</span></p>
+              <h3 class="arch__title"><a href="portfolio.html">This portfolio <span aria-hidden="true">&#8599;</span></a></h3>
+              <p class="label arch__note">IAM &middot; MFA-protected agent user, never root</p>
+            </header>
+            <div class="arch__stage">
+              <svg class="arch__wires" aria-hidden="true"></svg>
+              <div class="arch__vias" aria-hidden="true"></div>
+              <div class="arch__lane"><p class="arch__lname">Deploy</p>
+                <ol class="arch__chain" aria-label="Deploy: a push to GitHub triggers an automatic Amplify Hosting deploy, served to you over HTTPS"><li class="fnode fnode--ext" data-id="gh"><b>GitHub</b><small>sa1aj/portfolio</small></li><li class="fnode" data-id="amp" data-via="push"><i aria-hidden="true"></i><span><b>Amplify Hosting</b><small>auto-deploy</small></span></li><li class="fnode fnode--ext" data-id="you" data-via="HTTPS"><b>You</b><small>right now</small></li></ol></div>
+            </div>
           </article>
+        </div>
+        <div class="arch__dots" id="arch-dots">
+          <button type="button" aria-label="Show 1: Secure photography site" aria-current="true"></button>
+          <button type="button" aria-label="Show 2: Knightro Tracker"></button>
+          <button type="button" aria-label="Show 3: This portfolio"></button>
+        </div>
         </div>
         <dl class="stack">
           <div class="stack__row"><dt class="label">Languages</dt><dd>Java &middot; C &middot; Python</dd></div>
@@ -258,8 +290,9 @@
   <script src="js/terminal.js?v=6" defer></script>
   <script src="js/hero.js?v=17" defer></script>
   <script src="js/work.js?v=18" defer></script>
-  <script src="js/reveal.js?v=5" defer></script>
+  <script src="js/reveal.js?v=6" defer></script>
   <script src="js/scroll.js?v=1" defer></script>
   <script src="js/lens.js?v=4" defer></script>
+  <script src="js/arch.js?v=2" defer></script>
 </body>
 </html>

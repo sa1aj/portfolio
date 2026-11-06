@@ -333,7 +333,6 @@ kbd {
 
 /* ============ Sections ============ */
 .section { padding: clamp(5rem, 12vw, 10rem) 0; }
-.section--band { background: var(--bg-band); border-block: 1px solid var(--border); padding: clamp(4rem, 8vw, 7rem) 0; }
 
 /* Work */
 #projects .display { margin-bottom: clamp(2.5rem, 6vw, 5rem); }
@@ -425,63 +424,136 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .about-sec { padding-bottom: clamp(3rem, 6vw, 5rem); }
 
 /* Skills */
-/* ---- Skills as an architecture map ----
-   Each project is a group; each lane is an ordered list of service nodes. The
-   wire into a node (line, arrowhead, label from data-via) is drawn by that
-   node's ::before/::after, so the list itself stays plain, readable markup.
-   Hovering a lane (mouse only) lights it up node by node, like a signal
-   passing through. Phones: lanes run top to bottom. */
+/* ---- Skills as an architecture map (js/arch.js) ----
+   One project per slide in a swipeable track, with dots underneath. Each lane
+   is an ordered list of nodes laid out in a gentle wave (desktop) or a two-
+   column snake (phones); js/arch.js draws the curved wires between them and
+   plays the light-up. */
 .arch__head { display: grid; gap: 1.2rem; margin-bottom: clamp(2.5rem, 5vw, 4rem); max-width: 60ch; }
 .arch__h { font-size: clamp(2.4rem, 5vw, 4.6rem); }
 .arch__sub { color: var(--muted); font-size: .95rem; margin: 0; }
-.arch { display: grid; gap: 1.25rem; }
-.arch__group {
-  border: 1px solid var(--border); border-radius: 14px; background: var(--surface);
-  padding: clamp(1.25rem, 2.4vw, 2rem) clamp(1.25rem, 2.6vw, 2.25rem);
+.arch {
+  --arch-line: color-mix(in srgb, var(--text) 18%, transparent);
+  --arch-glow: rgba(226, 230, 240, .5);
+}
+:root[data-theme="light"] .arch { --arch-line: color-mix(in srgb, var(--text) 22%, transparent); --arch-glow: rgba(70, 50, 80, .28); }
+.arch__track {
+  display: flex; overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scrollbar-width: none;
+  border-radius: 22px;
+}
+.arch__track::-webkit-scrollbar { display: none; }
+.arch__track:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+.arch__slide {
+  flex: 0 0 100%; scroll-snap-align: start; scroll-snap-stop: always;
+  display: flex; flex-direction: column;
+  padding: clamp(1.5rem, 3.2vw, 3rem);
+  border: 1px solid color-mix(in srgb, var(--text) 8%, transparent); border-radius: 22px;
+  /* a faint plum haze in one corner, echoing the hero orb */
+  background:
+    radial-gradient(55% 75% at 92% 0%, rgba(93, 60, 89, .2), transparent 70%),
+    radial-gradient(40% 60% at 0% 100%, rgba(93, 60, 89, .08), transparent 70%);
+}
+:root[data-theme="light"] .arch__slide {
+  background:
+    radial-gradient(55% 75% at 92% 0%, rgba(150, 112, 145, .14), transparent 70%),
+    radial-gradient(40% 60% at 0% 100%, rgba(150, 112, 145, .07), transparent 70%);
 }
 .arch__ghead {
-  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline;
-  gap: .5rem 1.5rem; margin-bottom: 1.6rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--border-strong);
+  display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: .4rem 1.4rem;
+  margin-bottom: clamp(2rem, 4vw, 3.2rem);
 }
-.arch__gname { color: var(--text); text-decoration: none; }
-.arch__gname b { font-weight: 500; color: var(--muted); margin-right: .6em; }
-.arch__gname:hover { text-decoration: underline; text-underline-offset: 4px; }
-.arch__note { margin: 0; color: var(--muted); font-size: .6rem; }
-.arch__lane { display: grid; grid-template-columns: 7.5rem 1fr; align-items: center; gap: 1rem; padding: .7rem 0; }
-.arch__lname { margin: 0; color: var(--muted); font-size: .6rem; }
-.arch__chain { --wire: clamp(3.2rem, 6vw, 5.5rem); display: flex; align-items: center; flex-wrap: nowrap; }
-.arch__node {
-  position: relative; flex: 0 1 auto; min-width: 0;
-  display: grid; gap: .15rem; padding: .7rem 1rem;
-  border: 1px solid var(--border-strong); border-radius: 10px; background: var(--bg);
-  transition: border-color .35s ease, box-shadow .35s ease;
+.arch__num { margin: 0; color: var(--text); }
+.arch__num span { color: var(--dim); }
+.arch__title { font: 400 clamp(1.9rem, 3.4vw, 3rem)/1 var(--serif); letter-spacing: -.02em; margin: 0; }
+.arch__title a { color: var(--text); text-decoration: none; }
+.arch__title a span { font: .5em var(--sans); vertical-align: .55em; color: var(--muted); transition: color .3s ease; }
+.arch__title a:hover span { color: var(--text); }
+.arch__note { grid-column: 2; margin: 0; color: var(--muted); font-size: .6rem; }
+
+.arch__stage { position: relative; flex: 1; display: grid; align-content: center; gap: clamp(1.6rem, 3vw, 2.6rem); }
+.arch__wires, .arch__vias { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.arch__lane { position: relative; z-index: 1; display: grid; grid-template-columns: 8rem 1fr; align-items: start; gap: 1rem; }
+.arch__lname { margin: .55rem 0 0; font: italic 400 1.15rem var(--serif); color: var(--muted); }
+.arch__chain {   /* four aligned columns, so lanes spread across the card */
+  --hop: clamp(2.4rem, 4vw, 4.5rem);
+  display: grid; grid-template-columns: repeat(4, minmax(0, max-content)); justify-content: space-between;
+  align-items: start; column-gap: var(--hop); max-width: 1100px;
 }
-.arch__node b { font: 600 .9rem var(--sans); letter-spacing: -.01em; white-space: nowrap; }
-.arch__node small { font: .6rem var(--mono); color: var(--muted); letter-spacing: .04em; white-space: nowrap; }
-.arch__node--ext { background: transparent; border-style: dashed; }
-.arch__node--ext b { font-weight: 500; color: var(--muted); }
-/* the wire coming into each node after the first */
-.arch__node + .arch__node { margin-left: var(--wire); }
-.arch__node + .arch__node::before {          /* line + label */
-  content: attr(data-via); position: absolute; right: calc(100% + 1px); bottom: 50%; width: var(--wire);
-  padding-bottom: .3rem; border-bottom: 1px solid var(--border-strong);
-  font: .55rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
-  text-align: center; white-space: nowrap;
-  transition: border-color .35s ease, color .35s ease;
+.arch__chain > :nth-child(even) { margin-top: 2.1rem; }   /* the wave */
+
+/* Nodes: glassy pills with a chrome bead; outside-AWS ends are italic serif. */
+.fnode {
+  display: inline-flex; align-items: center; gap: .65rem; flex: none;
+  padding: .55rem 1rem .55rem .7rem; border-radius: 999px;
+  border: 1px solid var(--arch-line);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  color: var(--muted);
+  transition: color .7s ease, border-color .7s ease, box-shadow .7s ease;
 }
-.arch__node + .arch__node::after {           /* arrowhead */
-  content: ""; position: absolute; right: calc(100% + 1px); top: 50%; translate: 0 -50%;
-  border: 4px solid transparent; border-left: 6px solid var(--border-strong); border-right: 0;
-  transition: border-left-color .35s ease;
+.fnode i {
+  flex: none; width: 10px; height: 10px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #c9ccd1 40%, #6f737a 100%);
+  opacity: .45; transition: opacity .7s ease, box-shadow .7s ease;
 }
-@media (hover: hover) and (pointer: fine) {
-  .arch__lane:hover .arch__node { border-color: var(--text); }
-  .arch__lane:hover .arch__node + .arch__node::before { border-bottom-color: var(--text); color: var(--text); }
-  .arch__lane:hover .arch__node + .arch__node::after { border-left-color: var(--text); }
-  /* stagger: each hop lights a beat after the one before */
-  .arch__lane:hover .arch__node:nth-child(2), .arch__lane:hover .arch__node:nth-child(2)::before, .arch__lane:hover .arch__node:nth-child(2)::after { transition-delay: .12s; }
-  .arch__lane:hover .arch__node:nth-child(3), .arch__lane:hover .arch__node:nth-child(3)::before, .arch__lane:hover .arch__node:nth-child(3)::after { transition-delay: .24s; }
-  .arch__lane:hover .arch__node:nth-child(4), .arch__lane:hover .arch__node:nth-child(4)::before, .arch__lane:hover .arch__node:nth-child(4)::after { transition-delay: .36s; }
+.fnode span { display: grid; gap: .1rem; }
+.fnode b { font: 600 .88rem var(--sans); letter-spacing: -.01em; white-space: nowrap; }
+.fnode small { font: .58rem var(--mono); letter-spacing: .04em; color: var(--dim); white-space: nowrap; transition: color .7s ease; }
+.fnode--ext { border-style: dashed; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; display: inline-grid; gap: 0; padding: .45rem 1rem; }
+.fnode--ext b { font: italic 400 1.05rem var(--serif); letter-spacing: 0; }
+.fnode.is-lit { color: var(--text); border-color: color-mix(in srgb, var(--text) 55%, transparent); box-shadow: 0 0 22px -6px var(--arch-glow); }
+.fnode.is-lit i { opacity: 1; box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 8%, transparent), 0 0 14px var(--arch-glow); }
+.fnode.is-lit small { color: var(--muted); }
+
+/* Wires (SVG, drawn by js/arch.js): a faint base curve, and a bright signal
+   curve that draws along it. No arrowheads: the light-up shows direction. */
+.wire__base { fill: none; stroke: var(--arch-line); stroke-width: 1; transition: stroke .7s ease; }
+.wire--cross .wire__base { stroke-dasharray: 3 5; }
+.wire__sig { fill: none; stroke: var(--text); stroke-width: 1.4; stroke-linecap: round; filter: drop-shadow(0 0 4px var(--arch-glow)); }
+.wire.is-lit .wire__base { stroke: color-mix(in srgb, var(--text) 30%, transparent); }
+.via {   /* a small tag sitting on the wire's midpoint */
+  position: absolute; translate: -50% -50%; white-space: nowrap;
+  padding: .12rem .45rem; border-radius: 999px;
+  background: var(--bg); border: 1px solid var(--arch-line);
+  font: .52rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dim);
+  transition: color .7s ease, border-color .7s ease;
+}
+.via--side { translate: -50% -50%; }
+.via.is-lit { color: var(--text); border-color: color-mix(in srgb, var(--text) 40%, transparent); }
+
+/* Dots: one per slide; the current one stretches and turns chrome. */
+.arch__dots { display: flex; justify-content: center; gap: .55rem; margin-top: 1.4rem; }
+.arch__dots button {
+  width: 8px; height: 8px; padding: 0; border: 0; border-radius: 999px; cursor: pointer;
+  background: color-mix(in srgb, var(--text) 22%, transparent);
+  transition: width .45s cubic-bezier(.22, 1, .36, 1), background-color .45s ease;
+}
+.arch__dots button:hover { background-color: color-mix(in srgb, var(--text) 45%, transparent); }
+.arch__dots button[aria-current="true"] { width: 26px; background: var(--chrome-text); }
+
+@media (max-width: 1000px) {
+  .arch__lane { grid-template-columns: 1fr; gap: .8rem; }
+  .arch__lname { margin: 0; }
+  .fnode b, .fnode small { white-space: normal; }
+}
+@media (max-width: 700px) {
+  .arch__ghead { grid-template-columns: 1fr; }
+  .arch__note { grid-column: 1; }
+  /* two-column snake: 1 2 / 4 3 / 5 */
+  .arch__slide { padding: 1.4rem 1.1rem; }
+  .arch__chain { display: grid; grid-template-columns: 1fr 1fr; justify-content: stretch; gap: 2.4rem 3.6rem; max-width: none; }
+  .via { font-size: .47rem; letter-spacing: .04em; padding: .1rem .3rem; }
+  .arch__chain > :nth-child(even) { margin-top: 0; }
+  .arch__chain > :nth-child(1) { grid-area: 1 / 1; }
+  .arch__chain > :nth-child(2) { grid-area: 1 / 2; }
+  .arch__chain > :nth-child(3) { grid-area: 2 / 2; }
+  .arch__chain > :nth-child(4) { grid-area: 2 / 1; }
+  .arch__chain > :nth-child(5) { grid-area: 3 / 1; }
+  .fnode { justify-self: stretch; min-width: 0; padding: .5rem .6rem .5rem .55rem; gap: .45rem; }
+  .fnode--ext { padding: .45rem .8rem; }
+  .fnode b { white-space: normal; }
+  .fnode small { white-space: normal; }
 }
 /* Resume-style list under the map */
 .stack { margin: clamp(2.5rem, 5vw, 4rem) 0 0; display: grid; border-top: 1px solid var(--border); }
@@ -489,22 +561,7 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .stack__row dt { margin: 0; padding-top: .2rem; }
 .stack__row dd { margin: 0; color: var(--text); }
 
-@media (max-width: 1000px) {
-  .arch__lane { grid-template-columns: 1fr; gap: .7rem; }
-}
 @media (max-width: 700px) {
-  /* lanes run top to bottom; wires become vertical with the label beside them */
-  .arch__chain { --wire: 2.1rem; flex-direction: column; align-items: flex-start; }
-  .arch__node + .arch__node { margin-left: 0; margin-top: var(--wire); }
-  .arch__node + .arch__node::before {
-    right: auto; left: 1.1rem; bottom: calc(100% + 1px); width: auto; height: var(--wire);
-    padding: 0 0 0 .7rem; border-bottom: 0; border-left: 1px solid var(--border-strong);
-    display: flex; align-items: center;
-  }
-  .arch__node + .arch__node::after {
-    right: auto; top: auto; left: calc(1.1rem - 4px); bottom: calc(100% + 1px); translate: none;
-    border: 4px solid transparent; border-top: 6px solid var(--border-strong); border-bottom: 0;
-  }
   .stack__row { grid-template-columns: 1fr; gap: .35rem; }
 }
 
@@ -756,7 +813,7 @@ html.lightbox-open { overflow: hidden; }
   .preview, .preview img { transition: none; }
   .ptoc a, .nav::before, .nav::after, .pnav::before, .pnav::after { transition: none; }
   .hero__ctas .pill, .phero__ctas .pill { transition: none; }
-  .arch__node, .arch__node::before, .arch__node::after { transition: none; }
+  .fnode, .fnode i, .via, .arch__dots button { transition: none; }
   .hero__ctas .pill--grad:hover, .phero__ctas .pill--grad:hover { transition: none; }   /* no light sweep */
   .lens__card, .lightbox[open], .lightbox[open]::backdrop, .lightbox.is-closing, .lightbox.is-closing::backdrop { transition: none; animation: none; }
   .reveal-ready .rv { opacity: 1; transform: none; transition: none; }
