@@ -39,9 +39,11 @@
       "Photographer when I'm away from the keyboard."
     ],
     "skills.txt": [
-      "<span class='hl'>languages</span>   Python, Java, C",
-      "<span class='hl'>cloud/sec</span>   S3, CloudFront, GuardDuty, AWS serverless, Amplify",
-      "<span class='hl'>web/tools</span>   HTML/CSS/JS, Git, GitHub"
+      "<span class='hl'>languages</span>   Java, C, Python",
+      "<span class='hl'>cloud</span>       S3, CloudFront, IAM, KMS, CloudTrail, GuardDuty,",
+      "            EventBridge, SNS, Lambda, API Gateway, DynamoDB, Amplify",
+      "<span class='hl'>tools</span>       Git, GitHub, Linux, AWS CLI, Claude Code",
+      "<span class='hl'>studying</span>    AWS Certified Cloud Practitioner"
     ],
     "contact.txt": [
       "github    <a href='https://github.com/sa1aj' target='_blank' rel='noopener'>github.com/sa1aj</a>",

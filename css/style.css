@@ -425,11 +425,88 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .about-sec { padding-bottom: clamp(3rem, 6vw, 5rem); }
 
 /* Skills */
-.skills { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-.skill { background: var(--surface); border: 1px solid var(--border); padding: 2rem 2rem 2.3rem; }
-.skill:hover { border-color: var(--text); }
-.skill__label { color: var(--c); margin-bottom: 1.4rem; font-size: .62rem; }
-.skill ul { display: flex; flex-wrap: wrap; gap: .6rem 1.35rem; }
+/* ---- Skills as an architecture map ----
+   Each project is a group; each lane is an ordered list of service nodes. The
+   wire into a node (line, arrowhead, label from data-via) is drawn by that
+   node's ::before/::after, so the list itself stays plain, readable markup.
+   Hovering a lane (mouse only) lights it up node by node, like a signal
+   passing through. Phones: lanes run top to bottom. */
+.arch__head { display: grid; gap: 1.2rem; margin-bottom: clamp(2.5rem, 5vw, 4rem); max-width: 60ch; }
+.arch__h { font-size: clamp(2.4rem, 5vw, 4.6rem); }
+.arch__sub { color: var(--muted); font-size: .95rem; margin: 0; }
+.arch { display: grid; gap: 1.25rem; }
+.arch__group {
+  border: 1px solid var(--border); border-radius: 14px; background: var(--surface);
+  padding: clamp(1.25rem, 2.4vw, 2rem) clamp(1.25rem, 2.6vw, 2.25rem);
+}
+.arch__ghead {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline;
+  gap: .5rem 1.5rem; margin-bottom: 1.6rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--border-strong);
+}
+.arch__gname { color: var(--text); text-decoration: none; }
+.arch__gname b { font-weight: 500; color: var(--muted); margin-right: .6em; }
+.arch__gname:hover { text-decoration: underline; text-underline-offset: 4px; }
+.arch__note { margin: 0; color: var(--muted); font-size: .6rem; }
+.arch__lane { display: grid; grid-template-columns: 7.5rem 1fr; align-items: center; gap: 1rem; padding: .7rem 0; }
+.arch__lname { margin: 0; color: var(--muted); font-size: .6rem; }
+.arch__chain { --wire: clamp(3.2rem, 6vw, 5.5rem); display: flex; align-items: center; flex-wrap: nowrap; }
+.arch__node {
+  position: relative; flex: 0 1 auto; min-width: 0;
+  display: grid; gap: .15rem; padding: .7rem 1rem;
+  border: 1px solid var(--border-strong); border-radius: 10px; background: var(--bg);
+  transition: border-color .35s ease, box-shadow .35s ease;
+}
+.arch__node b { font: 600 .9rem var(--sans); letter-spacing: -.01em; white-space: nowrap; }
+.arch__node small { font: .6rem var(--mono); color: var(--muted); letter-spacing: .04em; white-space: nowrap; }
+.arch__node--ext { background: transparent; border-style: dashed; }
+.arch__node--ext b { font-weight: 500; color: var(--muted); }
+/* the wire coming into each node after the first */
+.arch__node + .arch__node { margin-left: var(--wire); }
+.arch__node + .arch__node::before {          /* line + label */
+  content: attr(data-via); position: absolute; right: calc(100% + 1px); bottom: 50%; width: var(--wire);
+  padding-bottom: .3rem; border-bottom: 1px solid var(--border-strong);
+  font: .55rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  text-align: center; white-space: nowrap;
+  transition: border-color .35s ease, color .35s ease;
+}
+.arch__node + .arch__node::after {           /* arrowhead */
+  content: ""; position: absolute; right: calc(100% + 1px); top: 50%; translate: 0 -50%;
+  border: 4px solid transparent; border-left: 6px solid var(--border-strong); border-right: 0;
+  transition: border-left-color .35s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .arch__lane:hover .arch__node { border-color: var(--text); }
+  .arch__lane:hover .arch__node + .arch__node::before { border-bottom-color: var(--text); color: var(--text); }
+  .arch__lane:hover .arch__node + .arch__node::after { border-left-color: var(--text); }
+  /* stagger: each hop lights a beat after the one before */
+  .arch__lane:hover .arch__node:nth-child(2), .arch__lane:hover .arch__node:nth-child(2)::before, .arch__lane:hover .arch__node:nth-child(2)::after { transition-delay: .12s; }
+  .arch__lane:hover .arch__node:nth-child(3), .arch__lane:hover .arch__node:nth-child(3)::before, .arch__lane:hover .arch__node:nth-child(3)::after { transition-delay: .24s; }
+  .arch__lane:hover .arch__node:nth-child(4), .arch__lane:hover .arch__node:nth-child(4)::before, .arch__lane:hover .arch__node:nth-child(4)::after { transition-delay: .36s; }
+}
+/* Resume-style list under the map */
+.stack { margin: clamp(2.5rem, 5vw, 4rem) 0 0; display: grid; border-top: 1px solid var(--border); }
+.stack__row { display: grid; grid-template-columns: 9rem 1fr; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+.stack__row dt { margin: 0; padding-top: .2rem; }
+.stack__row dd { margin: 0; color: var(--text); }
+
+@media (max-width: 1000px) {
+  .arch__lane { grid-template-columns: 1fr; gap: .7rem; }
+}
+@media (max-width: 700px) {
+  /* lanes run top to bottom; wires become vertical with the label beside them */
+  .arch__chain { --wire: 2.1rem; flex-direction: column; align-items: flex-start; }
+  .arch__node + .arch__node { margin-left: 0; margin-top: var(--wire); }
+  .arch__node + .arch__node::before {
+    right: auto; left: 1.1rem; bottom: calc(100% + 1px); width: auto; height: var(--wire);
+    padding: 0 0 0 .7rem; border-bottom: 0; border-left: 1px solid var(--border-strong);
+    display: flex; align-items: center;
+  }
+  .arch__node + .arch__node::after {
+    right: auto; top: auto; left: calc(1.1rem - 4px); bottom: calc(100% + 1px); translate: none;
+    border: 4px solid transparent; border-top: 6px solid var(--border-strong); border-bottom: 0;
+  }
+  .stack__row { grid-template-columns: 1fr; gap: .35rem; }
+}
 
 /* Contact / footer */
 .contact { text-align: center; padding: clamp(7rem, 14vw, 11rem) 0 2.5rem; }
@@ -679,6 +756,7 @@ html.lightbox-open { overflow: hidden; }
   .preview, .preview img { transition: none; }
   .ptoc a, .nav::before, .nav::after, .pnav::before, .pnav::after { transition: none; }
   .hero__ctas .pill, .phero__ctas .pill { transition: none; }
+  .arch__node, .arch__node::before, .arch__node::after { transition: none; }
   .hero__ctas .pill--grad:hover, .phero__ctas .pill--grad:hover { transition: none; }   /* no light sweep */
   .lens__card, .lightbox[open], .lightbox[open]::backdrop, .lightbox.is-closing, .lightbox.is-closing::backdrop { transition: none; animation: none; }
   .reveal-ready .rv { opacity: 1; transform: none; transition: none; }

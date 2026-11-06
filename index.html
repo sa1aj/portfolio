@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
   <!-- ?v= forces browsers to fetch the new file instead of a cached old one -->
-  <link rel="stylesheet" href="css/style.css?v=40">
+  <link rel="stylesheet" href="css/style.css?v=41">
   <script>
     // Apply saved theme before paint to avoid a flash.
     (function () {
@@ -176,20 +176,40 @@
       </dialog>
     </section>
 
-    <!-- SKILLS -->
+    <!-- SKILLS: the AWS services I've used, drawn as the pipelines I built. Hover a lane to trace it. -->
     <section class="section section--band" id="skills" aria-labelledby="skills-h">
       <div class="container">
-        <h2 class="sr-only" id="skills-h">Skills</h2>
-        <div class="skills">
-          <div class="skill"><p class="label skill__label" style="--c: var(--orange)">Languages</p>
-            <ul><li>Python</li><li>Java</li><li>C</li><li>JavaScript</li></ul></div>
-          <div class="skill"><p class="label skill__label" style="--c: var(--teal)">Cloud (AWS)</p>
-            <ul><li>S3</li><li>CloudFront</li><li>IAM</li><li>Amplify</li><li>GuardDuty</li></ul></div>
-          <div class="skill"><p class="label skill__label" style="--c: var(--blue)">Security</p>
-            <ul><li>Least Privilege</li><li>Threat Detection</li><li>Incident Response</li></ul></div>
-          <div class="skill"><p class="label skill__label" style="--c: var(--violet)">Tools</p>
-            <ul><li>Git</li><li>Linux</li><li>Claude Code</li><li>Docker</li></ul></div>
+        <div class="arch__head">
+          <h2 class="display arch__h" id="skills-h">Skills, wired up.</h2>
+          <p class="arch__sub">Every AWS service here is one I've configured in a real project, drawn the way the data actually flows.</p>
         </div>
+        <div class="arch">
+          <article class="arch__group">
+            <header class="arch__ghead"><a class="label arch__gname" href="s3-site.html"><b>01</b> Secure photography site <span aria-hidden="true">&#8599;</span></a><p class="label arch__note">IAM &middot; least-privilege, scoped to the bucket ARN</p></header>
+            <div class="arch__lane"><p class="label arch__lname">Delivery</p>
+              <ol class="arch__chain" aria-label="Delivery: a visitor reaches CloudFront over HTTPS, which reads the private S3 bucket through Origin Access Control"><li class="arch__node arch__node--ext"><b>Visitor</b></li><li class="arch__node" data-via="HTTPS"><b>CloudFront</b><small>HTTPS only</small></li><li class="arch__node" data-via="OAC"><b>S3</b><small>private bucket</small></li></ol></div>
+            <div class="arch__lane"><p class="label arch__lname">Audit</p>
+              <ol class="arch__chain" aria-label="Audit: account API activity is recorded by CloudTrail, encrypted with a customer-managed KMS key and stored in an S3 log bucket"><li class="arch__node arch__node--ext"><b>API activity</b></li><li class="arch__node" data-via="record"><b>CloudTrail</b><small>log file validation</small></li><li class="arch__node" data-via="encrypt"><b>KMS</b><small>customer-managed key</small></li><li class="arch__node" data-via="store"><b>S3</b><small>log bucket</small></li></ol></div>
+            <div class="arch__lane"><p class="label arch__lname">Detection</p>
+              <ol class="arch__chain" aria-label="Detection: GuardDuty findings go to an EventBridge rule for Medium and High severity, which publishes to SNS and emails me"><li class="arch__node"><b>GuardDuty</b><small>threat findings</small></li><li class="arch__node" data-via="finding"><b>EventBridge</b><small>Medium+ rule</small></li><li class="arch__node" data-via="match"><b>SNS</b><small>topic</small></li><li class="arch__node arch__node--ext" data-via="email"><b>Inbox</b></li></ol></div>
+          </article>
+          <article class="arch__group">
+            <header class="arch__ghead"><a class="label arch__gname" href="knightro.html"><b>02</b> Knightro Tracker <span aria-hidden="true">&#8599;</span></a><p class="label arch__note">Knight Hacks IX &middot; serverless, $0 when idle</p></header>
+            <div class="arch__lane"><p class="label arch__lname">Request</p>
+              <ol class="arch__chain" aria-label="Request: the browser calls an API Gateway HTTP API, which invokes Lambda functions that read and write DynamoDB"><li class="arch__node arch__node--ext"><b>Browser</b></li><li class="arch__node" data-via="HTTPS"><b>API Gateway</b><small>HTTP API · CORS</small></li><li class="arch__node" data-via="invoke"><b>Lambda</b><small>validate · last 20 min</small></li><li class="arch__node" data-via="read/write"><b>DynamoDB</b><small>on-demand</small></li></ol></div>
+          </article>
+          <article class="arch__group">
+            <header class="arch__ghead"><a class="label arch__gname" href="portfolio.html"><b>03</b> This portfolio <span aria-hidden="true">&#8599;</span></a><p class="label arch__note">IAM &middot; MFA-protected agent user, never root</p></header>
+            <div class="arch__lane"><p class="label arch__lname">Deploy</p>
+              <ol class="arch__chain" aria-label="Deploy: a push to GitHub triggers an automatic Amplify Hosting deploy, served to you over HTTPS"><li class="arch__node arch__node--ext"><b>GitHub</b><small>sa1aj/portfolio</small></li><li class="arch__node" data-via="push"><b>Amplify Hosting</b><small>auto-deploy</small></li><li class="arch__node arch__node--ext" data-via="HTTPS"><b>You</b><small>right now</small></li></ol></div>
+          </article>
+        </div>
+        <dl class="stack">
+          <div class="stack__row"><dt class="label">Languages</dt><dd>Java &middot; C &middot; Python</dd></div>
+          <div class="stack__row"><dt class="label">Cloud (AWS)</dt><dd>S3 &middot; CloudFront &middot; IAM &middot; KMS &middot; CloudTrail &middot; GuardDuty &middot; EventBridge &middot; SNS &middot; Lambda &middot; API Gateway &middot; DynamoDB &middot; Amplify</dd></div>
+          <div class="stack__row"><dt class="label">Tools</dt><dd>Git &middot; GitHub &middot; Linux &middot; AWS CLI &middot; Claude Code</dd></div>
+          <div class="stack__row"><dt class="label">In progress</dt><dd>AWS Certified Cloud Practitioner</dd></div>
+        </dl>
       </div>
     </section>
   </main>
@@ -235,10 +255,10 @@
     </form>
   </section>
 
-  <script src="js/terminal.js?v=5" defer></script>
+  <script src="js/terminal.js?v=6" defer></script>
   <script src="js/hero.js?v=17" defer></script>
   <script src="js/work.js?v=18" defer></script>
-  <script src="js/reveal.js?v=4" defer></script>
+  <script src="js/reveal.js?v=5" defer></script>
   <script src="js/scroll.js?v=1" defer></script>
   <script src="js/lens.js?v=4" defer></script>
 </body>
