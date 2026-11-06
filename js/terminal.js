@@ -44,8 +44,9 @@
       "<span class='hl'>web/tools</span>   HTML/CSS/JS, Git, GitHub"
     ],
     "contact.txt": [
-      "github    <a href='https://github.com/sa1aj' target='_blank' rel='noopener'>github.com/sa1aj</a>"
-      // TODO: add linkedin / email lines
+      "github    <a href='https://github.com/sa1aj' target='_blank' rel='noopener'>github.com/sa1aj</a>",
+      "linkedin  <a href='https://www.linkedin.com/in/salah-eddin-yacoub-8050b4325/' target='_blank' rel='noopener'>linkedin.com/in/salah-eddin-yacoub</a>",
+      "email     <a href='mailto:salah1yacoub@gmail.com'>salah1yacoub@gmail.com</a>"
     ],
     ".notes": [
       "<span class='dim'># note to self</span>",
