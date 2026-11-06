@@ -50,6 +50,8 @@
 /* ============ Base ============ */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-padding-top: 72px; }
+/* Sections focused by js/scroll.js after a link click: no focus ring on the whole section. */
+main [tabindex="-1"]:focus, footer[tabindex="-1"]:focus { outline: none; }
 body {
   margin: 0;
   font-family: var(--sans);
