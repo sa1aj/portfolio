@@ -12,8 +12,14 @@
   --teal: #2dd4bf;
   --blue: #60a5fa;
   --violet: #a78bfa;
-  /* Chrome: polished-metal bands (light highlights, darker steel between) */
-  --grad: linear-gradient(100deg, #8d9096 0%, #f5f6f8 18%, #b4b7bd 36%, #eef0f2 52%, #8a8d93 72%, #dfe1e5 88%, #a3a6ab 100%);
+  /* Chrome, like a horizon reflection: bright sky on top, a darker band through
+     the middle, lighter ground below, plus one broad diagonal glint. */
+  --chrome: linear-gradient(112deg, transparent 14%, rgba(255, 255, 255, .5) 30%, transparent 46%),
+            linear-gradient(180deg, #fbfcfd 0%, #dfe2e6 34%, #9da1a8 50%, #b9bdc2 60%, #e9ebee 82%, #ffffff 100%);
+  /* SY logo: same idea as text */
+  --chrome-text: linear-gradient(180deg, #ffffff 0%, #d7dade 40%, #7f848b 52%, #c3c6cb 66%, #f4f5f7 100%);
+  /* The progress bar is only 2px tall, so its chrome runs sideways. */
+  --grad: linear-gradient(90deg, #8f9399 0%, #f1f2f4 35%, #a9adb3 60%, #eceef1 100%);
   --line-rgb: 255, 255, 255;   /* hero line colour, read by js/hero.js */
   --line-alpha: 0.2;     /* dense lines -> fainter each */
   --orb-follow-fade: 0.5;  /* hero orb opacity while following the cursor */
@@ -40,6 +46,7 @@
   --muted: #555;
   --dim: #7a7a7a;
   --orange: #c77700;
+  --chrome-text: linear-gradient(180deg, #5d6168 0%, #2a2c30 45%, #0e0f11 52%, #3b3e43 70%, #6d7178 100%);
   --teal: #0f8f80;
   --blue: #2563eb;
   --violet: #7c3aed;
@@ -111,10 +118,24 @@ kbd {
 }
 .pill:hover { background: var(--text); color: var(--bg); }
 .pill--sm { padding: .5rem 1rem; font-size: .66rem; }
-.pill--grad { background: var(--grad); color: #0a0a0a; border-color: transparent;
+.pill--grad { background: var(--chrome); color: #0a0a0a; border-color: transparent;
+  position: relative; overflow: hidden; isolation: isolate;
   /* top-edge sheen + soft rim so the metal reads as rounded */
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), inset 0 -1px 0 rgba(0, 0, 0, .18), 0 0 0 1px rgba(0, 0, 0, .12); }
-.pill--grad:hover { background: var(--grad); color: #0a0a0a; }
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -1px 0 rgba(0, 0, 0, .2), 0 0 0 1px rgba(0, 0, 0, .14); }
+.pill--grad:hover { background: var(--chrome); color: #0a0a0a; }
+/* Hover (mouse/trackpad only): a band of light sweeps across the metal once.
+   Sits under the label (z-index -1 inside the isolated pill). */
+.pill--grad::after {
+  content: ""; position: absolute; inset: -20% auto -20% 0; width: 60%; z-index: -1; pointer-events: none;
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, .85) 45%, rgba(255, 255, 255, .95) 50%, transparent 100%);
+  translate: -120% 0; opacity: 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  .pill--grad:hover::after {
+    translate: 220% 0; opacity: 1;
+    transition: translate .9s cubic-bezier(.22, 1, .36, 1), opacity .2s ease;
+  }
+}
 
 /* ============ Nav ============ */
 .nav {
@@ -154,6 +175,9 @@ kbd {
 .nav__logo {
   justify-self: start;
   font: 700 1.3rem var(--sans); letter-spacing: -.04em; text-decoration: none; color: var(--text);
+  /* chrome lettering (gunmetal in the light theme) */
+  background: var(--chrome-text); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .nav__links { display: flex; gap: 2.2rem; }
 .nav__links a {
@@ -649,6 +673,7 @@ html.lightbox-open { overflow: hidden; }
   .preview, .preview img { transition: none; }
   .ptoc a, .nav::before, .nav::after, .pnav::before, .pnav::after { transition: none; }
   .hero__ctas .pill, .phero__ctas .pill { transition: none; }
+  .pill--grad::after { display: none; }   /* no light sweep */
   .lens__card, .lightbox[open], .lightbox[open]::backdrop, .lightbox.is-closing, .lightbox.is-closing::backdrop { transition: none; animation: none; }
   .reveal-ready .rv { opacity: 1; transform: none; transition: none; }
 }
