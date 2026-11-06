@@ -300,6 +300,8 @@
   function toggleTheme() {
     var next = currentTheme() === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
+    var meta = document.querySelector('meta[name="theme-color"]');   // iOS status bar colour
+    if (meta) meta.content = next === "light" ? "#f3f1ec" : "#070707";
     try { localStorage.setItem("theme", next); } catch (e) {}
   }
 
