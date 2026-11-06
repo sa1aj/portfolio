@@ -11,7 +11,8 @@
  * - The lens is a strong, slightly tall oval; it eases after the cursor and
  *   relaxes when the cursor leaves the hero. Lines stay white (no colour tint).
  * - A soft purple orb rests behind the headline and follows the cursor on an
- *   underdamped spring, fading a little while it follows.
+ *   underdamped spring, fading while it follows. In the light theme the headline
+ *   inverts over it: a masked copy of the kicker + title tracks the orb (--mx/--my/--mr).
  */
 (function () {
   "use strict";
@@ -20,6 +21,8 @@
   var canvas = document.getElementById("hero-lines");
   var orbEl = document.getElementById("hero-orb");
   var titleEl = document.getElementById("hero-h");
+  var wrapEl = document.getElementById("hero-titlewrap");   // holds the inverted headline copy
+  var wrapX = 0, wrapY = 0;        // headline box position inside the hero
   if (!hero || !canvas || !canvas.getContext) return;
   var ctx = canvas.getContext("2d");
 
@@ -28,6 +31,7 @@
   var W = 0, H = 0, spacing = 30, step = 10;
   var lineX = [];                  // resting x of each line
   var lineRGB = "255,255,255", lineAlpha = 0.3;
+  var followFade = 0.5;            // orb opacity while following (per theme, from CSS)
   var t = 0, last = 0, running = false, rafId = 0, inView = true;
 
   var pointer = { x: 0, y: 0, inside: false };
@@ -40,6 +44,7 @@
     var cs = getComputedStyle(document.documentElement);
     lineRGB = cs.getPropertyValue("--line-rgb").trim() || "255,255,255";
     lineAlpha = parseFloat(cs.getPropertyValue("--line-alpha")) || 0.3;
+    followFade = parseFloat(cs.getPropertyValue("--orb-follow-fade")) || 0.5;
   }
 
   function resize() {
@@ -61,7 +66,15 @@
       home.x = tr.left - r.left + tr.width / 2;
       home.y = tr.top - r.top + tr.height / 2;
     } else { home.x = W / 2; home.y = H / 2; }
-    if (!orb.placed) { orb.x = home.x; orb.y = home.y; orb.placed = true; placeOrb(); }
+    if (wrapEl && orbEl) {
+      var wr = wrapEl.getBoundingClientRect();
+      wrapX = wr.left - r.left; wrapY = wr.top - r.top;
+      // The glow is radial-gradient(circle, ...) on a square, so its stops are
+      // measured to the corner: half the width times sqrt(2).
+      wrapEl.style.setProperty("--mr", (orbEl.offsetWidth * 0.7071).toFixed(1) + "px");
+    }
+    if (!orb.placed) { orb.x = home.x; orb.y = home.y; orb.placed = true; }
+    placeOrb();
   }
 
   // Sideways offset of the line that rests at x0, at height y and time t.
@@ -80,6 +93,10 @@
     if (!orbEl) return;
     orbEl.style.transform = "translate3d(" + orb.x.toFixed(1) + "px," + orb.y.toFixed(1) + "px,0)";
     orbEl.style.opacity = orb.fade.toFixed(3);
+    if (wrapEl) {   // keep the inverted headline's mask on the orb
+      wrapEl.style.setProperty("--mx", (orb.x - wrapX).toFixed(1) + "px");
+      wrapEl.style.setProperty("--my", (orb.y - wrapY).toFixed(1) + "px");
+    }
   }
 
   // ---------- Input (mouse / pen) ----------
@@ -145,8 +162,8 @@
       orb.vx *= 0.84;                 orb.vy *= 0.84;
       orb.x += orb.vx;                orb.y += orb.vy;
     }
-    // Fainter while following; back to full strength once it rests.
-    orb.fade += ((pointer.inside ? 0.5 : 1) - orb.fade) * 0.05 * k;
+    // Fainter while following (how faint is per theme: --orb-follow-fade); full strength at rest.
+    orb.fade += ((pointer.inside ? followFade : 1) - orb.fade) * 0.05 * k;
     placeOrb();
     draw();
     if (running) rafId = requestAnimationFrame(frame);

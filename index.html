@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
   <!-- ?v= forces browsers to fetch the new file instead of a cached old one -->
-  <link rel="stylesheet" href="css/style.css?v=20">
+  <link rel="stylesheet" href="css/style.css?v=22">
   <script>
     // Apply saved theme before paint to avoid a flash.
     (function () {
@@ -50,8 +50,15 @@
       <div class="hero__orb" id="hero-orb" aria-hidden="true"><div class="hero__glow"></div><div class="hero__grain"></div></div>
       <canvas class="hero__lines" id="hero-lines" aria-hidden="true"></canvas>
       <div class="hero__center">
-        <p class="label hero__kicker">Salah Yacoub &mdash; Cloud Security</p>
-        <h1 class="hero__title" id="hero-h">Secure by<br>default.</h1>
+        <div class="hero__titlewrap" id="hero-titlewrap">
+          <p class="label hero__kicker">Salah Yacoub &mdash; Cloud Security</p>
+          <h1 class="hero__title" id="hero-h">Secure by<br>default.</h1>
+          <!-- inverted copy, masked to the orb by js/hero.js -->
+          <div class="hero__inv" aria-hidden="true">
+            <p class="label hero__kicker">Salah Yacoub &mdash; Cloud Security</p>
+            <p class="hero__title">Secure by<br>default.</p>
+          </div>
+        </div>
       </div>
       <div class="hero__bottom">
         <p class="hero__intro">CS @ UCF. Building on AWS and learning to secure what I build.</p>
@@ -179,7 +186,7 @@
   </section>
 
   <script src="js/terminal.js?v=4" defer></script>
-  <script src="js/hero.js?v=15" defer></script>
+  <script src="js/hero.js?v=17" defer></script>
   <script src="js/work.js?v=18" defer></script>
 </body>
 </html>
