@@ -557,7 +557,12 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .lens__hint-touch { display: none; }
 @media (hover: none) { .lens__hint-fine { display: none; } .lens__hint-touch { display: inline; } }
 
-.lens__board { position: relative; aspect-ratio: 16 / 9; max-width: 1500px; }
+.lens__board {
+  position: relative; aspect-ratio: 16 / 9; max-width: 1500px;
+  /* No-scroll zone: touches anywhere on the board (photos and the gaps between
+     them) go to dragging, not page scrolling. Scroll by touching outside it. */
+  touch-action: none;
+}
 .lens__card {
   position: absolute; left: var(--x); top: var(--y); width: var(--w);
   padding: 0; border: 0; background: var(--surface); border-radius: 6px; overflow: hidden;
@@ -565,7 +570,6 @@ a.work__row:focus-visible { outline-offset: -2px; }
   box-shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 255, 255, .06);
   transition: scale .45s cubic-bezier(.22, 1, .36, 1), rotate .45s cubic-bezier(.22, 1, .36, 1),
               box-shadow .45s cubic-bezier(.22, 1, .36, 1);
-  touch-action: pan-y;   /* vertical swipes scroll the page; sideways ones drag (js/lens.js) */
   -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
 }
 .lens__card img { width: 100%; height: auto; display: block; pointer-events: none; user-select: none; }

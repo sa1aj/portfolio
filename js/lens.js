@@ -1,9 +1,9 @@
 /* "Behind the lens" photo pile (home page).
  * - Mouse/trackpad: grab any photo and drag it around the board; it comes to the
  *   front and straightens while held. A click without dragging enlarges it.
- * - Touch: same, with a finger. Cards use touch-action: pan-y, so a swipe that
- *   starts up/down still scrolls the page; one that starts sideways picks the
- *   photo up, and it then follows the finger in any direction. Tap enlarges.
+ * - Touch: same, with a finger. The whole board is a no-scroll zone
+ *   (touch-action: none in style.css), so a photo picks up straight away in any
+ *   direction; to scroll, touch outside the board. Tap enlarges.
  * - Keyboard: each photo is a button (Enter/Space enlarges).
  * - Enlarged view: a <dialog> with a dimmed backdrop; close with x, Esc or a click
  *   outside the photo; arrows (buttons or keys) or a sideways swipe step
