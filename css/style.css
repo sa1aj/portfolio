@@ -12,7 +12,8 @@
   --teal: #2dd4bf;
   --blue: #60a5fa;
   --violet: #a78bfa;
-  --grad: linear-gradient(90deg, #f6b800 0%, #8fd14f 60%, #2fcf86 100%);
+  /* Chrome: polished-metal bands (light highlights, darker steel between) */
+  --grad: linear-gradient(100deg, #8d9096 0%, #f5f6f8 18%, #b4b7bd 36%, #eef0f2 52%, #8a8d93 72%, #dfe1e5 88%, #a3a6ab 100%);
   --line-rgb: 255, 255, 255;   /* hero line colour, read by js/hero.js */
   --line-alpha: 0.2;     /* dense lines -> fainter each */
   --orb-follow-fade: 0.5;  /* hero orb opacity while following the cursor */
@@ -110,7 +111,9 @@ kbd {
 }
 .pill:hover { background: var(--text); color: var(--bg); }
 .pill--sm { padding: .5rem 1rem; font-size: .66rem; }
-.pill--grad { background: var(--grad); color: #0a0a0a; border-color: transparent; }
+.pill--grad { background: var(--grad); color: #0a0a0a; border-color: transparent;
+  /* top-edge sheen + soft rim so the metal reads as rounded */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), inset 0 -1px 0 rgba(0, 0, 0, .18), 0 0 0 1px rgba(0, 0, 0, .12); }
 .pill--grad:hover { background: var(--grad); color: #0a0a0a; }
 
 /* ============ Nav ============ */
