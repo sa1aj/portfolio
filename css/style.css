@@ -12,10 +12,16 @@
   --teal: #2dd4bf;
   --blue: #60a5fa;
   --violet: #a78bfa;
-  /* Chrome, like a horizon reflection: bright sky on top, a darker band through
-     the middle, lighter ground below, plus one broad diagonal glint. */
-  --chrome: linear-gradient(112deg, transparent 14%, rgba(255, 255, 255, .5) 30%, transparent 46%),
-            linear-gradient(180deg, #fbfcfd 0%, #dfe2e6 34%, #9da1a8 50%, #b9bdc2 60%, #e9ebee 82%, #ffffff 100%);
+  /* Chrome: slanted reflections with deliberately uneven spacing and strength
+     (one wide bright face, one sharp dark slant, a soft mid highlight, a shallow
+     late dip) so nothing reads as a repeating stripe. A faint top-to-bottom wash
+     on top adds depth without a hard horizon line. */
+  --chrome: linear-gradient(180deg, rgba(255, 255, 255, .22) 0%, transparent 45%, rgba(0, 0, 0, .05) 100%),
+            linear-gradient(104deg, #a4a7ad 0%, #e6e8eb 7%, #fafbfc 17%, #d4d7db 29%, #8f9399 36%, #b3b6bb 42%,
+                                    #edeff1 58%, #f6f7f8 64%, #c9ccd0 79%, #b2b5ba 86%, #dfe1e4 100%);
+  /* Hover light sweep: a bright band on a layer 2.5x the pill's width, slid
+     across with background-position (see .pill--grad). */
+  --sweep: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, .85) 49%, rgba(255, 255, 255, .95) 50%, transparent 60%);
   /* SY logo: same idea as text */
   --chrome-text: linear-gradient(180deg, #ffffff 0%, #d7dade 40%, #7f848b 52%, #c3c6cb 66%, #f4f5f7 100%);
   /* The progress bar is only 2px tall, so its chrome runs sideways. */
@@ -118,23 +124,20 @@ kbd {
 }
 .pill:hover { background: var(--text); color: var(--bg); }
 .pill--sm { padding: .5rem 1rem; font-size: .66rem; }
-.pill--grad { background: var(--chrome); color: #0a0a0a; border-color: transparent;
-  position: relative; overflow: hidden; isolation: isolate;
+.pill--grad, .pill--grad:hover {
+  /* The sweep is painted as part of the pill's own background (not a child
+     layer), so it can never show outside the rounded edge, however fast you
+     hover in and out. At rest (position 100%) the band sits just off the left edge. */
+  background: var(--sweep) 100% 0 / 250% 100% no-repeat, var(--chrome);
+  color: #0a0a0a; border-color: transparent;
   /* top-edge sheen + soft rim so the metal reads as rounded */
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -1px 0 rgba(0, 0, 0, .2), 0 0 0 1px rgba(0, 0, 0, .14); }
-.pill--grad:hover { background: var(--chrome); color: #0a0a0a; }
-/* Hover (mouse/trackpad only): a band of light sweeps across the metal once.
-   Sits under the label (z-index -1 inside the isolated pill). */
-.pill--grad::after {
-  content: ""; position: absolute; inset: -20% auto -20% 0; width: 60%; z-index: -1; pointer-events: none;
-  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, .85) 45%, rgba(255, 255, 255, .95) 50%, transparent 100%);
-  translate: -120% 0; opacity: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -1px 0 rgba(0, 0, 0, .2), 0 0 0 1px rgba(0, 0, 0, .14);
 }
+/* Hover (mouse/trackpad only): the band glides left to right once and ends off
+   the right edge (position 0%). On mouse-out it snaps back unseen. The
+   transition is set with the CTA rules below. */
 @media (hover: hover) and (pointer: fine) {
-  .pill--grad:hover::after {
-    translate: 220% 0; opacity: 1;
-    transition: translate .9s cubic-bezier(.22, 1, .36, 1), opacity .2s ease;
-  }
+  .pill--grad:hover { background-position: 0% 0, 0 0; }
 }
 
 /* ============ Nav ============ */
@@ -304,6 +307,9 @@ kbd {
 /* Hero buttons (home: See my work / Get in touch; project pages: Live / Code) grow
    a little on hover (mouse/trackpad only). Size, fill and text colour share one
    long ease-out so the hover reads as a single smooth motion. */
+.hero__ctas .pill--grad:hover, .phero__ctas .pill--grad:hover {
+  transition: scale .5s cubic-bezier(.22, 1, .36, 1), background-position 1s cubic-bezier(.22, 1, .36, 1);
+}
 .hero__ctas .pill, .phero__ctas .pill {
   transition: scale .5s cubic-bezier(.22, 1, .36, 1),
               background-color .5s cubic-bezier(.22, 1, .36, 1),
@@ -673,7 +679,7 @@ html.lightbox-open { overflow: hidden; }
   .preview, .preview img { transition: none; }
   .ptoc a, .nav::before, .nav::after, .pnav::before, .pnav::after { transition: none; }
   .hero__ctas .pill, .phero__ctas .pill { transition: none; }
-  .pill--grad::after { display: none; }   /* no light sweep */
+  .hero__ctas .pill--grad:hover, .phero__ctas .pill--grad:hover { transition: none; }   /* no light sweep */
   .lens__card, .lightbox[open], .lightbox[open]::backdrop, .lightbox.is-closing, .lightbox.is-closing::backdrop { transition: none; animation: none; }
   .reveal-ready .rv { opacity: 1; transform: none; transition: none; }
 }
