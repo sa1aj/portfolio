@@ -187,11 +187,38 @@
   }
 
   // ---------- Carousel ----------
+  // Dots and arrow keys glide the track with our own slower ease (the browser's
+  // smooth scroll is so quick the bubble's stretch can't be seen). Snapping is
+  // paused during the glide so it can't tug at in-between positions; touching
+  // or wheeling the track hands control straight back to the user.
+  var GLIDE_MS = 800, glide = null;
+  function easeInOut(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function stopGlide() {
+    if (!glide) return;
+    cancelAnimationFrame(glide.raf); glide = null;
+    track.style.scrollSnapType = "";
+  }
   function go(i, smooth) {
     i = Math.max(0, Math.min(slides.length - 1, i));
-    track.scrollTo({ left: slides[i].offsetLeft - slides[0].offsetLeft,
-                     behavior: smooth && !reduce.matches ? "smooth" : "auto" });
+    var to = slides[i].offsetLeft - slides[0].offsetLeft;
+    stopGlide();
+    if (!smooth || reduce.matches) { track.scrollLeft = to; return; }
+    var from = track.scrollLeft;
+    if (Math.abs(to - from) < 1) return;
+    track.style.scrollSnapType = "none";
+    glide = { t0: null, raf: 0 };
+    var step = function (now) {
+      if (!glide) return;
+      if (glide.t0 === null) glide.t0 = now;
+      var k = Math.min(1, (now - glide.t0) / GLIDE_MS);
+      track.scrollLeft = from + (to - from) * easeInOut(k);
+      if (k < 1) glide.raf = requestAnimationFrame(step);
+      else { glide = null; track.style.scrollSnapType = ""; }
+    };
+    glide.raf = requestAnimationFrame(step);
   }
+  track.addEventListener("pointerdown", stopGlide);
+  track.addEventListener("wheel", stopGlide, { passive: true });
   function setCurrent(i) {
     if (i === current) return;
     var prev = S[current];
