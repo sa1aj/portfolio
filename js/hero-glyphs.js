@@ -7,13 +7,17 @@
  * - Where lines bunch up or cross (the local spacing collapses) and on passing
  *   crests, the water is "foamy": glyphs brighten and turn into dense symbols
  *   that flicker. Calm stretches are faint dots and dashes.
- * - The cursor is a boat: it leaves a Kelvin wake. For each glyph near the
- *   cursor's recent path we find how far back along the path it is (s) and how
- *   far to the side (n). Two arms open at the Kelvin angle (|n| = 0.354 s,
- *   about 19.5 degrees), each made of a few long streaks fanning at slightly
- *   smaller angles (the feathered lines in a real wake), plus a churned strip
- *   down the middle just behind the cursor. It fades with distance and, when
- *   the cursor stops, fades out. It follows the path, so turns bend it.
+ * - The cursor is a boat: it leaves a Kelvin wake that lives in the water, not
+ *   on the cursor. Every bit of the recent path remembers when it was made and
+ *   how fast the cursor was going. Waves made there spread sideways as they
+ *   age: the arms sit at |n| = 0.354 x speed x age (about 19.5 degrees for a
+ *   steady straight run, the Kelvin angle), each a few streaks fanning at
+ *   slightly smaller angles, with churn just behind the cursor and calmer water
+ *   inside the V. So the wake stays where it was made, keeps spreading and
+ *   fades: when the cursor stops it dissipates. Each path segment covers the
+ *   glyphs beside it (rounded caps at the path's end and at sharp turns), and where segments overlap the
+ *   strongest one wins rather than adding up. Sharp turns damp the V arms, so
+ *   wiggling back and forth leaves churn near the path, not a solid block.
  * - Clicking (or tapping) drops a ring ripple that spreads and fades.
  *   (Cost control: only glyphs inside the effects' bounding box are tested.)
  * - Glyphs dim behind the headline so it stays readable.
@@ -43,10 +47,9 @@
   var seeds = [];                 // per-cell random, so calm glyphs stay put
   var title = { x: 0, y: 0, rx: 1, ry: 1 };
   var pointer = { x: 0, y: 0, inside: false };
-  var path = [];                      // cursor's recent path, oldest first: { x, y, t, amp }
+  var path = [];                      // cursor's recent path, oldest first: { x, y, t, u (speed px/s) }
   var ripples = [];                   // click ripples: { x, y, t }
-  var WAKE_LIFE = 2.0;                // seconds a path point keeps feeding the wake
-  var KELVIN = 0.354;                 // tan(19.47 deg): the Kelvin wake half-angle
+  var WAKE_LIFE = 2.2;                // seconds a wave made on the path lives
   var RIP_C = 260, RIP_LIFE = 2.6;
   var lastMove = { x: 0, y: 0, at: 0 };
 
@@ -111,61 +114,85 @@
     }
   }
 
-  // The wake: path segments from the cursor backwards, with distance-along-path.
-  var segs = [], nSegs = 0;
+  // The wake: path segments from the cursor backwards (newest first).
+  // 0.354 = tan(19.47 deg), the Kelvin wake half-angle.
+  var segs = [], nSegs = 0, MAX_SPREAD = 260;
   function prepWake() {
     nSegs = 0;
     if (!path.length) return;
     var pts = path.slice();
-    if (pointer.inside) pts.push({ x: pointer.x, y: pointer.y, t: t, amp: path[path.length - 1].amp });
-    var s = 0, minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (var i = pts.length - 1; i > 0; i--) {             // newest -> oldest
+    if (pointer.inside) pts.push({ x: pointer.x, y: pointer.y, t: t, u: path[path.length - 1].u });
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity, reach = 0;
+    for (var i = pts.length - 1; i > 0; i--) {
       var A = pts[i], B = pts[i - 1], dx = B.x - A.x, dy = B.y - A.y, len = Math.sqrt(dx * dx + dy * dy);
-      if (len < 0.5) continue;
-      var fa = Math.max(0, 1 - (t - A.t) / WAKE_LIFE), fb = Math.max(0, 1 - (t - B.t) / WAKE_LIFE);
+      if (len < 0.5 || t - B.t > WAKE_LIFE) continue;
       var o = segs[nSegs] || (segs[nSegs] = {});
-      o.ax = A.x; o.ay = A.y; o.ux = dx / len; o.uy = dy / len; o.len = len; o.s0 = s;
-      o.ka = A.amp * Math.pow(fa, 1.4); o.kb = B.amp * Math.pow(fb, 1.4); o.last = i === 1;
-      nSegs++; s += len;
+      o.ax = A.x; o.ay = A.y; o.ux = dx / len; o.uy = dy / len; o.len = len;
+      o.ta = A.t; o.tb = B.t; o.ua = A.u; o.ub = B.u;
+      var oldest = t - B.t, w = 3 + oldest * 22;
+      o.maxN = Math.min(MAX_SPREAD, 0.354 * Math.max(A.u, B.u) * oldest) + 3 * w + 8;
+      reach = Math.max(reach, o.maxN);
+      nSegs++;
       minX = Math.min(minX, A.x, B.x); maxX = Math.max(maxX, A.x, B.x);
       minY = Math.min(minY, A.y, B.y); maxY = Math.max(maxY, A.y, B.y);
     }
-    if (!nSegs) return;
-    var reach = KELVIN * s + 30;
-    grow(minX - reach, minY - reach, maxX + reach, maxY + reach);
+    // straightness: how well each segment lines up with its neighbours (1 straight, 0 at a reversal)
+    // ...and where its ends get a rounded cap: the path's oldest end and sharp
+    // turns only (never at the cursor, so nothing shows ahead of it)
+    for (var s = 0; s < nSegs; s++) {
+      var o2 = segs[s], dA = 1, dB = 1;
+      if (s > 0) dA = o2.ux * segs[s - 1].ux + o2.uy * segs[s - 1].uy;
+      if (s < nSegs - 1) dB = o2.ux * segs[s + 1].ux + o2.uy * segs[s + 1].uy;
+      o2.straight = Math.max(0, Math.min(1, (Math.min(dA, dB) - 0.1) / 0.8));
+      o2.capA = s > 0 && dA < 0.3;
+      o2.capB = s === nSegs - 1 || dB < 0.3;
+    }
+    if (nSegs) grow(minX - reach, minY - reach, maxX + reach, maxY + reach);
   }
-  var STREAKS = [KELVIN, 0.3, 0.25, 0.19], STREAK_W = [1, 0.7, 0.55, 0.4];
+  var STREAKS = [1, 0.85, 0.7, 0.54], STREAK_W = [1, 0.7, 0.55, 0.4];   // fractions of the Kelvin arm
   function wakeAt(x, y) {
-    var best = Infinity, bs = 0, bn = 0, bk = 0, bux = 0, buy = 0;
+    var bestV = 0, bestCalm = 0, pushX = 0, pushY = 0;
     for (var i = 0; i < nSegs; i++) {
       var o = segs[i], px = x - o.ax, py = y - o.ay;
       var along = px * o.ux + py * o.uy;
-      if (along < 0) continue;                               // ahead of this part of the path: no wake
-      var tt = along / o.len;
-      if (tt > 1) { if (o.last) continue; tt = 1; }          // behind the tail: no wake
-      if (tt < 0) tt = 0;
-      var qx = px - o.ux * o.len * tt, qy = py - o.uy * o.len * tt, d2 = qx * qx + qy * qy;
-      if (d2 < best) {
-        best = d2; bs = o.s0 + o.len * tt; bn = o.ux * py - o.uy * px;   // signed side distance
-        bk = o.ka + (o.kb - o.ka) * tt; bux = o.ux; buy = o.uy;
+      var n = o.ux * py - o.uy * px;
+      // past a segment's ends the wave spreads from the end point like a point
+      // source (a rounded cap), so wakes never end in a hard edge
+      var over = along < 0 ? -along : along > o.len ? along - o.len : 0;
+      var capped = over > 0 && (along < 0 ? o.capA : o.capB);
+      if (along < 0 && segs[0] === o) continue;              // ahead of the cursor: nothing
+      var an = capped ? Math.sqrt(over * over + n * n) : (n < 0 ? -n : n);
+      if (an > o.maxN) continue;
+      var f = along / o.len, fc = f < 0 ? 0 : f > 1 ? 1 : f;
+      var age = t - (o.ta + (o.tb - o.ta) * fc);
+      if (age < 0 || age > WAKE_LIFE) continue;
+      var w = 3 + age * 22, taper = 1;
+      if (over > 0 && !capped) {                             // smooth joint: short taper only
+        if (over > w * 1.5) continue;
+        taper = 1 - over / (w * 1.5);
       }
+      var U = o.ua + (o.ub - o.ua) * fc;
+      var spread = Math.min(MAX_SPREAD, 0.354 * U * age);
+      var fade = Math.pow(1 - age / WAKE_LIFE, 1.6) * Math.max(0.3, Math.min(1, U / 600)) * taper;
+      var arms = 0;
+      for (var k = 0; k < STREAKS.length; k++) {
+        var r = (an - spread * STREAKS[k]) / w;
+        arms += STREAK_W[k] * Math.exp(-r * r);
+      }
+      var cwid = 4 + age * 18, cen = Math.exp(-(an * an) / (cwid * cwid)) * Math.exp(-age / 0.3);
+      var armK = capped ? 1 : 0.35 + 0.65 * o.straight;      // turns soften the arms; caps keep them
+      var v = (arms * 1.5 * armK * Math.min(1, age / 0.12) + cen * 0.8) * fade;
+      if (v > bestV) {
+        bestV = v;
+        var side = n < 0 ? -1 : 1;                            // push glyphs away from the path
+        pushX = -o.uy * side * v * 5; pushY = o.ux * side * v * 5;
+      }
+      var inside = Math.max(0, Math.min(1, (spread - an) / (w * 2)));
+      bestCalm = Math.max(bestCalm, inside * fade * o.straight * 0.7);
     }
-    if (best === Infinity || bk < 0.02 || bs < 4) return;
-    var an = Math.abs(bn), w = 5 + bs * 0.02;
-    if (an > KELVIN * bs + 3 * w + 6) return;                // outside the V
-    var arms = 0;
-    for (var k = 0; k < STREAKS.length; k++) {
-      var r = (an - STREAKS[k] * bs) / w;
-      arms += STREAK_W[k] * Math.exp(-r * r);
-    }
-    var cw2 = 4 + bs * 0.05, cen = Math.exp(-(an * an) / (cw2 * cw2)) * Math.exp(-bs / 150);
-    var v = (arms * 1.2 * Math.min(1, bs / 30) + cen * 0.9) * Math.exp(-bs / 650) * bk;
-    var side = bn < 0 ? -1 : 1;                               // push glyphs away from the centre line
-    dist.ox += -buy * side * v * 5; dist.oy += bux * side * v * 5;
-    dist.foam += v;
-    // inside the V the water is calmer than the chop around it, so the arms stand out
-    var inside = Math.max(0, Math.min(1, (KELVIN * bs - an) / (w * 2)));
-    dist.calm = Math.max(dist.calm, inside * Math.min(1, bk * 1.4) * Math.exp(-bs / 600) * Math.min(1, bs / 25) * 0.75);
+    dist.ox += pushX; dist.oy += pushY;
+    dist.foam += bestV;
+    dist.calm = Math.max(dist.calm, bestCalm);
   }
 
   function disturb(x, y) {
@@ -247,7 +274,7 @@
     var now = performance.now(), mx = x - lastMove.x, my = y - lastMove.y, moved = Math.sqrt(mx * mx + my * my);
     if (moved >= 12 || !path.length) {
       var speed = moved / Math.max(8, now - lastMove.at) * 1000;          // px/s
-      path.push({ x: x, y: y, t: t, amp: Math.max(0.3, Math.min(1, speed / 600)) });
+      path.push({ x: x, y: y, t: t, u: Math.max(120, Math.min(1100, speed)) });
       if (path.length > 70) path.shift();
       lastMove.x = x; lastMove.y = y; lastMove.at = now;
     }
