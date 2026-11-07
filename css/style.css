@@ -246,6 +246,8 @@ kbd {
           mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 74%, transparent 100%);
 }
 .hero__center, .hero__bottom { position: relative; z-index: 1; }
+/* Experiment: symbol sea, no orb (and no orb-masked text inversion) */
+.hero--glyphs .hero__orb, .hero--glyphs .hero__inv { display: none !important; }
 
 /* Orb: dark plum core fading into a pink-lavender haze, blurred, with film grain.
    js/hero.js moves it; translate(-50%,-50%) centres it on that point.
