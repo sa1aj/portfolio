@@ -1,5 +1,9 @@
-/* Hero (experiment): the old contour lines, rebuilt from terminal symbols and
- * whipped up into a rough sea.
+/* Glyph sea (home page: hero and contact footer): the old contour lines,
+ * rebuilt from terminal symbols and whipped up into a rough sea.
+ * makeSea(cfg) runs one instance: cfg.section (sized + listens), cfg.canvas,
+ * cfg.hush (element or list of elements the glyphs dim behind), cfg.alpha
+ * (overall strength, default 1), cfg.floats (elements whose letters
+ * float), cfg.fadeBottom (fade glyphs out at the bottom edge).
  * - Each vertical line is now a column of monospace glyphs. Their sideways
  *   position comes from the same kind of flow field as before (sums of sines),
  *   but with bigger, faster swells, so neighbouring lines swing into each other
@@ -24,16 +28,17 @@
  * - The headline floats too: each letter bobs and tilts on a slow wave, and
  *   letters near the cursor are nudged away from it, easing back after.
  *   (The h1 keeps an aria-label; the letter spans are aria-hidden.)
- * - Only animates while the hero is on screen; reduced motion = one still frame.
+ * - Only animates while its section is on screen; reduced motion = one still frame.
  */
 (function () {
   "use strict";
-  var hero = document.getElementById("top");
-  var canvas = document.getElementById("hero-lines");
-  var titleEl = document.getElementById("hero-titlewrap");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+function makeSea(cfg) {
+  var hero = cfg.section, canvas = cfg.canvas;
+  var hushEls = [].concat(cfg.hush || []).filter(Boolean), quiet = cfg.alpha || 1;
   if (!hero || !canvas || !canvas.getContext) return;
   var ctx = canvas.getContext("2d");
-  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   // glyph ramps, calm -> foam
   var RAMP = [
@@ -48,7 +53,7 @@
   var rgb = "255,255,255", baseA = 0.9, plum = [];
   var t = 0, last = 0, running = false, raf = 0, inView = true;
   var seeds = [];                 // per-cell random, so calm glyphs stay put
-  var title = { x: 0, y: 0, rx: 1, ry: 1 };
+  var hushes = [];                // ellipses the glyphs dim inside: { x, y, rx, ry }
   var pointer = { x: 0, y: 0, inside: false };
   var path = [];                      // cursor's recent path, oldest first: { x, y, t, u (speed px/s) }
   var ripples = [];                   // click ripples: { x, y, t }
@@ -80,23 +85,30 @@
     for (var i = 0; i < seeds.length; i++) seeds[i] = Math.random();
     ctx.font = (small ? 12 : 13) + "px 'JetBrains Mono', ui-monospace, monospace";
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    if (titleEl) {
-      var tr = titleEl.getBoundingClientRect();
-      title.x = tr.left - r.left + tr.width / 2; title.y = tr.top - r.top + tr.height / 2;
-      title.rx = tr.width * 0.62; title.ry = tr.height * 0.75;
-    }
+    hushes = hushEls.map(function (el) {
+      var tr = el.getBoundingClientRect();
+      return { x: tr.left - r.left + tr.width / 2, y: tr.top - r.top + tr.height / 2,
+               rx: Math.max(tr.width * 0.62, 40), ry: Math.max(tr.height * 0.75, 28) };
+    });
     measureTitle();
   }
 
-  // ---------- Floating headline ----------
-  var titleH = document.getElementById("hero-h");
-  var letters = [], fs = 100;
-  function splitTitle() {
-    if (!titleH || reduce.matches || titleH.dataset.split) return;
-    titleH.dataset.split = "1";
-    var label = Array.prototype.map.call(titleH.childNodes, function (n) { return n.nodeType === 3 ? n.textContent : " "; }).join("");
-    titleH.setAttribute("aria-label", label.replace(/\s+/g, " ").trim());   // <br> counts as a space
-    Array.prototype.slice.call(titleH.childNodes).forEach(function (node) {
+  // ---------- Floating text ----------
+  var floats = (cfg.floats || []).filter(Boolean);
+  var letters = [];
+  function splitOne(el) {
+    if (el.dataset.split) return;
+    el.dataset.split = "1";
+    if (!el.hasAttribute("aria-label") && !el.hasAttribute("aria-hidden")) {
+      var label = Array.prototype.map.call(el.childNodes, function (n) { return n.nodeName === "BR" ? " " : n.textContent; }).join("");
+      el.setAttribute("aria-label", label.replace(/\s+/g, " ").trim());   // <br> counts as a space
+    }
+    Array.prototype.slice.call(el.childNodes).forEach(function (node) {
+      if (node.nodeType === 1 && node.nodeName !== "BR") {   // an inline element (e.g. the email's "1"): one letter
+        node.classList.add("tl-c"); node.setAttribute("aria-hidden", "true");
+        letters.push({ el: node, host: el, cx: 0, cy: 0, x: 0, y: 0, r: 0, s: 1, fs: 100 });
+        return;
+      }
       if (node.nodeType !== 3) return;                       // keep the <br>
       var frag = document.createDocumentFragment();
       node.textContent.split(/(\s+)/).forEach(function (part) {
@@ -108,28 +120,29 @@
           var c = document.createElement("span");
           c.className = "tl-c"; c.textContent = part[i];
           word.appendChild(c);
-          letters.push({ el: c, cx: 0, cy: 0, x: 0, y: 0, r: 0, s: 1 });
+          letters.push({ el: c, host: el, cx: 0, cy: 0, x: 0, y: 0, r: 0, s: 1, fs: 100 });
         }
         frag.appendChild(word);
       });
-      titleH.replaceChild(frag, node);
+      el.replaceChild(frag, node);
     });
   }
+  function splitTitle() { if (!reduce.matches) floats.forEach(splitOne); }
   function measureTitle() {
     if (!letters.length) return;
     var hr = hero.getBoundingClientRect();
-    fs = parseFloat(getComputedStyle(titleH).fontSize) || 100;
+    floats.forEach(function (el) { el._fs = parseFloat(getComputedStyle(el).fontSize) || 100; });
     letters.forEach(function (L) { L.el.style.transform = ""; });
     letters.forEach(function (L) {
       var r = L.el.getBoundingClientRect();
-      L.cx = r.left - hr.left + r.width / 2; L.cy = r.top - hr.top + r.height / 2;
+      L.cx = r.left - hr.left + r.width / 2; L.cy = r.top - hr.top + r.height / 2; L.fs = L.host._fs;
     });
   }
   function moveTitle(k) {
     if (!letters.length) return;
-    var R = fs * 1.3, R2 = R * R, amp = fs * 0.016, push = fs * 0.1;
     for (var i = 0; i < letters.length; i++) {
-      var L = letters[i];
+      var L = letters[i], fs = Math.min(L.fs, 150);         // giant text: cap so it isn't flung around
+      var R = fs * 1.3, R2 = R * R, amp = fs * 0.016, push = fs * 0.1;
       // resting swell: a slow wave running along the line
       var tx = 0, ty = amp * Math.sin(L.cx * 0.011 - t * 1.3) + amp * 0.5 * Math.sin(L.cx * 0.023 + t * 0.9 + L.cy * 0.01);
       var tr = 0.8 * Math.sin(L.cx * 0.008 - t * 1.1 + 1.2), ts = 1;
@@ -290,7 +303,7 @@
       var x0 = (li - 4) * gap;
       for (var r = 0; r < rows; r++) {
         var y = r * ch + ch / 2;
-        var vy = y / H, edge = Math.min(1, vy / 0.16, (1 - vy) / 0.2);
+        var vy = y / H, edge = Math.min(1, vy / 0.16, cfg.fadeBottom ? (1 - vy) / 0.2 : 1);
         if (edge <= 0) continue;
         var sw = swing(x0, y);
         var x = x0 + sw;
@@ -309,9 +322,12 @@
         var pick = lvl === 5 ? (seeds[idx] * 97 + tick) | 0 : (seeds[idx] * 31) | 0;
         var g = set.charAt(pick % set.length);
         if (g === " ") continue;
-        var ex = (x - title.x) / title.rx, ey = (y - title.y) / title.ry;
-        var e2 = ex * ex + ey * ey, hush = e2 < 1 ? 0.15 + 0.85 * e2 * e2 : 1;
-        var a = baseA * edge * hush * (0.16 + 0.84 * Math.pow(I, 1.4));
+        var hush = 1;
+        for (var hi = 0; hi < hushes.length; hi++) {
+          var hz = hushes[hi], ex = (x - hz.x) / hz.rx, ey = (y - hz.y) / hz.ry, e2 = ex * ex + ey * ey;
+          if (e2 < 1) hush = Math.min(hush, 0.15 + 0.85 * e2 * e2);
+        }
+        var a = baseA * quiet * edge * hush * (0.16 + 0.84 * Math.pow(I, 1.4));
         if (a < 0.06) continue;
         ctx.fillStyle = "rgba(" + plum[lvl] + "," + a.toFixed(3) + ")";
         ctx.fillText(g, x, gy);
@@ -372,6 +388,17 @@
     new IntersectionObserver(function (en) { inView = en[0].isIntersecting; inView ? start() : stop(); }).observe(hero);
   }
   document.addEventListener("visibilitychange", function () { document.hidden ? stop() : start(); });
+
+}
+
+  makeSea({ section: document.getElementById("top"), canvas: document.getElementById("hero-lines"),
+            hush: document.getElementById("hero-titlewrap"), floats: [document.getElementById("hero-h")], fadeBottom: true });
+  makeSea({ section: document.getElementById("contact"), canvas: document.getElementById("contact-lines"),
+            hush: [document.querySelector(".contact__lead"), document.querySelector(".contact__email"),
+                   document.querySelector(".contact__copy"), document.querySelector(".contact__icons"),
+                   document.querySelector(".contact__copyright"), document.querySelector(".contact__base span:last-child")],
+            alpha: 0.7,
+            floats: [document.querySelector(".contact__email"), document.querySelector(".contact__name")], fadeBottom: false });
 
   // Nav is see-through only at the very top of the page (carried over from hero.js).
   var nav = document.getElementById("nav");

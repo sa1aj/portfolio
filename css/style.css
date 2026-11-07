@@ -248,9 +248,11 @@ kbd {
 .hero__center, .hero__bottom { position: relative; z-index: 1; }
 /* Experiment: symbol sea, no orb (and no orb-masked text inversion) */
 .hero--glyphs .hero__orb, .hero--glyphs .hero__inv { display: none !important; }
-/* floating headline letters (js/hero-glyphs.js) */
-.hero__title .tl-w { display: inline-block; white-space: nowrap; }
-.hero__title .tl-c { display: inline-block; will-change: transform; transform-origin: 50% 70%; }
+/* floating letters (js/glyph-sea.js): hero headline, contact email and name */
+.tl-w { display: inline-block; white-space: nowrap; }
+.tl-c { display: inline-block; will-change: transform; transform-origin: 50% 70%; }
+/* the giant name's fade: each letter carries the gradient itself */
+.contact__name .tl-c { background: var(--name-fade); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 /* Orb: dark plum core fading into a pink-lavender haze, blurred, with film grain.
    js/hero.js moves it; translate(-50%,-50%) centres it on that point.
@@ -632,7 +634,8 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .contact__name {
   position: relative; z-index: 0; margin: clamp(1.5rem, 4vw, 3rem) 0 0;
   font: 400 clamp(4rem, 17.5vw, 22rem)/.8 var(--serif); letter-spacing: -.045em; white-space: nowrap;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--text) 80%, transparent) 0%, color-mix(in srgb, var(--text) 35%, transparent) 55%, transparent 92%);
+  --name-fade: linear-gradient(180deg, color-mix(in srgb, var(--text) 80%, transparent) 0%, color-mix(in srgb, var(--text) 35%, transparent) 55%, transparent 92%);
+  background: var(--name-fade);
   -webkit-background-clip: text; background-clip: text; color: transparent;
   margin-bottom: -.08em; user-select: none;
 }

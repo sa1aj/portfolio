@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
   <!-- ?v= forces browsers to fetch the new file instead of a cached old one -->
-  <link rel="stylesheet" href="css/style.css?v=53">
+  <link rel="stylesheet" href="css/style.css?v=55">
   <script>
     // Apply saved theme before paint to avoid a flash.
     (function () {
@@ -46,7 +46,7 @@
   </header>
 
   <main id="main">
-    <!-- HERO (experiment: a rough sea of code symbols, js/hero-glyphs.js; the orb is hidden) -->
+    <!-- HERO (experiment: a rough sea of code symbols, js/glyph-sea.js; the orb is hidden) -->
     <section class="hero hero--glyphs" id="top" aria-labelledby="hero-h">
       <div class="hero__orb" id="hero-orb" aria-hidden="true"><div class="hero__glow"></div><div class="hero__grain"></div></div>
       <canvas class="hero__lines" id="hero-lines" aria-hidden="true"></canvas>
@@ -249,7 +249,7 @@
   <!-- CONTACT / FOOTER -->
   <!-- CONTACT: big email + copy, icon links, then a huge name fading out over
        the hero's line field (js/footer.js draws the lines and handles copy). -->
-  <footer class="contact" id="contact" aria-labelledby="contact-h">
+  <footer class="contact contact--glyphs" id="contact" aria-labelledby="contact-h">
     <canvas class="contact__lines" id="contact-lines" aria-hidden="true"></canvas>
     <div class="container contact__inner">
       <h2 class="contact__lead" id="contact-h">Let's build something secure.</h2>
@@ -298,12 +298,12 @@
   </section>
 
   <script src="js/terminal.js?v=7" defer></script>
-  <script src="js/hero-glyphs.js?v=17" defer></script>
+  <script src="js/glyph-sea.js?v=2" defer></script>
   <script src="js/work.js?v=18" defer></script>
   <script src="js/reveal.js?v=7" defer></script>
   <script src="js/scroll.js?v=1" defer></script>
   <script src="js/lens.js?v=4" defer></script>
   <script src="js/arch.js?v=5" defer></script>
-  <script src="js/footer.js?v=1" defer></script>
+  <script src="js/footer.js?v=2" defer></script>
 </body>
 </html>
