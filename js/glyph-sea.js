@@ -398,7 +398,7 @@ function makeSea(cfg) {
                    document.querySelector(".contact__copy"), document.querySelector(".contact__icons"),
                    document.querySelector(".contact__copyright"), document.querySelector(".contact__base span:last-child")],
             alpha: 0.7,
-            floats: [document.querySelector(".contact__email"), document.querySelector(".contact__name")], fadeBottom: false });
+            floats: [document.querySelector(".contact__name")], fadeBottom: false });
 
   // Nav is see-through only at the very top of the page (carried over from hero.js).
   var nav = document.getElementById("nav");
