@@ -586,11 +586,19 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .contact__inner { position: relative; z-index: 2; display: grid; justify-items: center; }
 .contact__lead { margin: 0 0 clamp(1rem, 2.4vw, 1.8rem); font: italic 400 clamp(1.2rem, 2.2vw, 1.8rem) var(--serif); color: var(--muted); }
 .contact__email {
+  position: relative; display: inline-block;
   font: 400 clamp(2rem, 7.6vw, 8.4rem)/1 var(--serif); letter-spacing: -.035em;
   color: var(--text); text-decoration: none; white-space: nowrap;
-  transition: color .3s ease;
 }
-.contact__email:hover { color: transparent; background: var(--chrome-text); -webkit-background-clip: text; background-clip: text; }
+/* Hover: an underline draws in from left to right; on leave it carries on
+   out to the right, so it never just snaps away. */
+.contact__email::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -.24em;   /* below the y and g descenders */
+  height: max(2px, .028em); border-radius: 999px; background: currentColor;
+  transform: scaleX(0); transform-origin: right center;
+  transition: transform .7s cubic-bezier(.65, 0, .35, 1);
+}
+.contact__email:hover::after, .contact__email:focus-visible::after { transform: scaleX(1); transform-origin: left center; }
 /* Bodoni's 1 looks like an l at this size; set the digit in the sans so the address reads right */
 .contact__digit { font-family: var(--sans); font-weight: 300; font-size: .86em; letter-spacing: 0; margin: 0 .02em; }
 .contact__copy {
@@ -895,6 +903,7 @@ html.lightbox-open { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .terminal, .terminal.is-open { transition: none; transform: none; }
+  .contact__email::after { transition: none; }
   .work__row, .work__meta, .work__meta b, .work__desc { transition: none; }
   .preview, .preview img { transition: none; }
   .ptoc a, .nav::before, .nav::after, .pnav::before, .pnav::after { transition: none; }
