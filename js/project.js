@@ -64,10 +64,11 @@
     '<figure class="lightbox__fig"><img class="lightbox__img" alt=""><figcaption class="label lightbox__cap"></figcaption></figure>';
   document.body.appendChild(box);
   var img = box.querySelector("img"), cap = box.querySelector("figcaption"), current = 0;
-  // mark very wide screenshots so CSS can show a close-up crop in the card
+  // mark very wide (console strip) and very tall (phone) shots so CSS can show a close-up crop in the card
   links.forEach(function (a) {
     var t = a.querySelector("img"); if (!t) return;
-    var mark = function () { if (t.naturalWidth && t.naturalHeight / t.naturalWidth < 0.45) a.parentNode.classList.add("is-strip"); };
+    var mark = function () { if (!t.naturalWidth) return; var r = t.naturalHeight / t.naturalWidth;
+      if (r < 0.45) a.parentNode.classList.add("is-strip"); else if (r > 1.3) a.parentNode.classList.add("is-tall"); };
     if (t.complete) mark(); else t.addEventListener("load", mark);
   });
   function pad(n) { return (n < 10 ? "0" : "") + n; }
