@@ -21,6 +21,9 @@
  * - Clicking (or tapping) drops a ring ripple that spreads and fades.
  *   (Cost control: only glyphs inside the effects' bounding box are tested.)
  * - Glyphs dim behind the headline so it stays readable.
+ * - The headline floats too: each letter bobs and tilts on a slow wave, and
+ *   letters near the cursor are nudged away from it, easing back after.
+ *   (The h1 keeps an aria-label; the letter spans are aria-hidden.)
  * - Only animates while the hero is on screen; reduced motion = one still frame.
  */
 (function () {
@@ -74,6 +77,66 @@
       var tr = titleEl.getBoundingClientRect();
       title.x = tr.left - r.left + tr.width / 2; title.y = tr.top - r.top + tr.height / 2;
       title.rx = tr.width * 0.62; title.ry = tr.height * 0.75;
+    }
+    measureTitle();
+  }
+
+  // ---------- Floating headline ----------
+  var titleH = document.getElementById("hero-h");
+  var letters = [], fs = 100;
+  function splitTitle() {
+    if (!titleH || reduce.matches || titleH.dataset.split) return;
+    titleH.dataset.split = "1";
+    var label = Array.prototype.map.call(titleH.childNodes, function (n) { return n.nodeType === 3 ? n.textContent : " "; }).join("");
+    titleH.setAttribute("aria-label", label.replace(/\s+/g, " ").trim());   // <br> counts as a space
+    Array.prototype.slice.call(titleH.childNodes).forEach(function (node) {
+      if (node.nodeType !== 3) return;                       // keep the <br>
+      var frag = document.createDocumentFragment();
+      node.textContent.split(/(\s+)/).forEach(function (part) {
+        if (!part) return;
+        if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(" ")); return; }
+        var word = document.createElement("span");
+        word.className = "tl-w"; word.setAttribute("aria-hidden", "true");
+        for (var i = 0; i < part.length; i++) {
+          var c = document.createElement("span");
+          c.className = "tl-c"; c.textContent = part[i];
+          word.appendChild(c);
+          letters.push({ el: c, cx: 0, cy: 0, x: 0, y: 0, r: 0, s: 1 });
+        }
+        frag.appendChild(word);
+      });
+      titleH.replaceChild(frag, node);
+    });
+  }
+  function measureTitle() {
+    if (!letters.length) return;
+    var hr = hero.getBoundingClientRect();
+    fs = parseFloat(getComputedStyle(titleH).fontSize) || 100;
+    letters.forEach(function (L) { L.el.style.transform = ""; });
+    letters.forEach(function (L) {
+      var r = L.el.getBoundingClientRect();
+      L.cx = r.left - hr.left + r.width / 2; L.cy = r.top - hr.top + r.height / 2;
+    });
+  }
+  function moveTitle(k) {
+    if (!letters.length) return;
+    var R = fs * 1.6, R2 = R * R, amp = fs * 0.028, push = fs * 0.2;
+    for (var i = 0; i < letters.length; i++) {
+      var L = letters[i];
+      // resting swell: a slow wave running along the line
+      var tx = 0, ty = amp * Math.sin(L.cx * 0.011 - t * 1.3) + amp * 0.5 * Math.sin(L.cx * 0.023 + t * 0.9 + L.cy * 0.01);
+      var tr = 1.6 * Math.sin(L.cx * 0.008 - t * 1.1 + 1.2), ts = 1;
+      if (pointer.inside) {                                  // nudged away from the cursor
+        var dx = L.cx - pointer.x, dy = L.cy - pointer.y, d2 = dx * dx + dy * dy;
+        if (d2 < R2) {
+          var d = Math.sqrt(d2) + 1, f = 1 - d2 / R2; f *= f;
+          tx += dx / d * push * f; ty += dy / d * push * f;
+          tr += (dx < 0 ? -1 : 1) * 6 * f; ts += 0.05 * f;
+        }
+      }
+      var e = 0.12 * k;                                      // ease toward the target: a soft, watery lag
+      L.x += (tx - L.x) * e; L.y += (ty - L.y) * e; L.r += (tr - L.r) * e; L.s += (ts - L.s) * e;
+      L.el.style.transform = "translate(" + L.x.toFixed(1) + "px," + L.y.toFixed(1) + "px) rotate(" + L.r.toFixed(2) + "deg) scale(" + L.s.toFixed(3) + ")";
     }
   }
 
@@ -256,6 +319,7 @@
     while (path.length && t - path[0].t > WAKE_LIFE) path.shift();
     while (ripples.length && t - ripples[0].t > RIP_LIFE) ripples.shift();
     draw();
+    moveTitle(k);
     if (running) raf = requestAnimationFrame(frame);
   }
   function start() {
@@ -289,6 +353,7 @@
   });
   document.documentElement.addEventListener("pointerleave", function () { pointer.inside = false; });
 
+  splitTitle();
   readTheme(); resize(); t = 3; draw();
   start();
   var rt;

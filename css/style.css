@@ -248,6 +248,9 @@ kbd {
 .hero__center, .hero__bottom { position: relative; z-index: 1; }
 /* Experiment: symbol sea, no orb (and no orb-masked text inversion) */
 .hero--glyphs .hero__orb, .hero--glyphs .hero__inv { display: none !important; }
+/* floating headline letters (js/hero-glyphs.js) */
+.hero__title .tl-w { display: inline-block; white-space: nowrap; }
+.hero__title .tl-c { display: inline-block; will-change: transform; transform-origin: 50% 70%; }
 
 /* Orb: dark plum core fading into a pink-lavender haze, blurred, with film grain.
    js/hero.js moves it; translate(-50%,-50%) centres it on that point.
