@@ -270,8 +270,8 @@
     goto: function (args) {
       var id = (args[0] || "").toLowerCase();
       if (id === "work") id = "projects";
-      var el = ["about", "skills", "projects", "lens", "contact", "top"].indexOf(id) !== -1 && document.getElementById(id);
-      if (!el) { print("usage: goto work | about | lens | skills | contact | top", "err"); return; }
+      if (["about", "skills", "projects", "lens", "contact", "top"].indexOf(id) === -1) { print("usage: goto work | about | lens | skills | contact | top", "err"); return; }
+      if (!document.getElementById(id)) { location.href = "index.html#" + id; return; }   // project pages: go home
       gotoSection(id);
       print("→ scrolled to " + (id === "projects" ? "work" : id), "ok");
     },
@@ -459,7 +459,7 @@
 
   // ---------- Events ----------
   toggleBtn.addEventListener("click", function () { term.hidden ? openTerm() : closeTerm(); });
-  hintBtn.addEventListener("click", openTerm);
+  if (hintBtn) hintBtn.addEventListener("click", openTerm);   // home page only
   closeBtn.addEventListener("click", closeTerm);
   themeBtn.addEventListener("click", toggleTheme);
 

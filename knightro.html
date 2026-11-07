@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-  <link rel="stylesheet" href="css/style.css?v=55">
+  <link rel="stylesheet" href="css/style.css?v=56">
   <script>
     (function () { try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {} var m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = document.documentElement.dataset.theme === "light" ? "#f3f1ec" : "#070707"; })();
   </script>
@@ -20,8 +20,16 @@
 
   <div class="progress" aria-hidden="true"><span class="progress__bar" id="progress"></span></div>
   <header class="pnav">
-    <a class="label pnav__back" href="index.html#projects"><span aria-hidden="true">&larr;</span> Back to work</a>
     <a class="nav__logo" href="index.html" aria-label="Salah Yacoub, home">SY</a>
+    <div class="nav__actions">
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle light/dark theme" title="Toggle theme">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="icon-btn icon-btn--term" id="term-toggle" type="button"
+              aria-controls="terminal" aria-expanded="false" title="Terminal mode ( ` )">
+        <span aria-hidden="true">&gt;_</span><span class="sr-only">Open terminal mode</span>
+      </button>
+    </div>
   </header>
 
   <main id="main">
@@ -107,6 +115,30 @@
     <span>&copy; 2026 Salah Yacoub</span>
     <a href="index.html#contact">Get in touch &rarr;</a>
   </footer>
+  <!-- TERMINAL (js/terminal.js depends on these ids) -->
+  <section class="terminal" id="terminal" aria-label="Terminal mode" hidden>
+    <div class="terminal__bar">
+      <span class="terminal__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="terminal__title"><span class="terminal__name">salah.sec</span><span class="terminal__sub mono">guest session</span></span>
+      <button class="terminal__close" id="term-close" type="button" aria-label="Close terminal">&times;</button>
+    </div>
+    <div class="terminal__out mono" id="term-out" role="log" aria-live="polite"></div>
+    <div class="terminal__chips" aria-label="Quick commands">
+      <button type="button" data-cmd="help">help</button>
+      <button type="button" data-cmd="whoami">whoami</button>
+      <button type="button" data-cmd="ls projects">ls projects</button>
+      <button type="button" data-cmd="ls">ls</button>
+      <button type="button" data-cmd="cat about.txt">cat about.txt</button>
+      <button type="button" data-cmd="clear">clear</button>
+    </div>
+    <form class="terminal__form mono" id="term-form" autocomplete="off">
+      <label for="term-in" class="terminal__prompt">guest@salah.sec:~$</label>
+      <input id="term-in" type="text" spellcheck="false" autocapitalize="off" autocorrect="off"
+             aria-label="Terminal command input" enterkeyhint="send">
+    </form>
+  </section>
+
+  <script src="js/terminal.js?v=8" defer></script>
   <script src="js/project.js?v=19" defer></script>
   <script src="js/reveal.js?v=7" defer></script>
 </body>
