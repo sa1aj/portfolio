@@ -793,14 +793,43 @@ a.work__row:focus-visible { outline-offset: -2px; }
 .plist--sub > li { border-left-color: var(--border-strong) !important; color: var(--muted); }
 
 
-.gallery { display: grid; gap: 1.1rem; grid-auto-flow: dense; }
+/* Gallery: every shot sits in the same framed card (16:10, the first one wide
+   at 16:9) on a faint plum haze, so screenshots of any shape line up; captions
+   are numbered by a CSS counter. Clicking opens the viewer (js/project.js). */
+.gallery { counter-reset: shot; display: grid; gap: clamp(1.2rem, 2.4vw, 2rem) clamp(1rem, 2vw, 1.6rem); }
 @media (min-width: 760px) { .gallery { grid-template-columns: 1fr 1fr; } }
-.gallery__item { margin: 0; }
-.gallery__item--wide { grid-column: 1 / -1; }
-.gallery__item a { display: block; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; background: var(--surface); }
-.gallery__item img { width: 100%; height: auto; }
-.gallery__item a:hover { border-color: var(--muted); }
-.gallery__item figcaption { margin-top: .7rem; font-size: .6rem; color: var(--dim); }
+.gallery__item { counter-increment: shot; margin: 0; min-width: 0; }
+.gallery__item:first-child { grid-column: 1 / -1; }
+.gallery__item a {
+  display: grid; place-items: center; aspect-ratio: 16 / 10; padding: clamp(.9rem, 2.2vw, 1.8rem);
+  border: 1px solid color-mix(in srgb, var(--text) 9%, transparent); border-radius: 16px; overflow: hidden;
+  background:
+    radial-gradient(70% 90% at 85% 0%, rgba(93, 60, 89, .22), transparent 70%),
+    radial-gradient(60% 80% at 0% 100%, rgba(93, 60, 89, .1), transparent 70%),
+    var(--surface);
+  cursor: zoom-in; transition: border-color .35s ease;
+}
+:root[data-theme="light"] .gallery__item a {
+  background: radial-gradient(70% 90% at 85% 0%, rgba(150, 112, 145, .16), transparent 70%), var(--surface);
+}
+.gallery__item:first-child a { aspect-ratio: 16 / 9; }
+.gallery__item img {
+  width: 100%; height: 100%; object-fit: contain;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, .45));
+  transition: scale .6s cubic-bezier(.22, 1, .36, 1);
+}
+:root[data-theme="light"] .gallery__item img { filter: drop-shadow(0 10px 22px rgba(40, 30, 20, .18)); }
+/* Very wide, short screenshots (console strips) would shrink to a sliver in a
+   uniform card: show a readable close-up instead, focused by --focus (x
+   position, set per figure); the viewer still shows the whole thing. */
+.gallery__item.is-strip img { object-fit: cover; object-position: var(--focus, 0%) 0; border-radius: 8px; }
+.gallery__item a:hover { border-color: color-mix(in srgb, var(--text) 28%, transparent); }
+@media (hover: hover) { .gallery__item a:hover img { scale: 1.025; } }
+.gallery__item figcaption {
+  display: flex; align-items: baseline; gap: .8rem; margin-top: .85rem;
+  font: 400 .92rem/1.4 var(--sans); letter-spacing: 0; text-transform: none; color: var(--muted);
+}
+.gallery__item figcaption::before { content: counter(shot, decimal-leading-zero); font: 500 .62rem var(--mono); letter-spacing: .1em; color: var(--dim); }
 
 .pnext { padding-bottom: clamp(4rem, 8vw, 6rem); }
 .pnext a {
@@ -917,6 +946,6 @@ html.lightbox-open { overflow: hidden; }
   .hero__ctas .pill, .phero__ctas .pill { transition: none; }
   .fnode, .fnode i, .via, .arch__dots button { transition: none; }   /* the bubble just jumps (scroll is instant) */
   .hero__ctas .pill--grad:hover, .phero__ctas .pill--grad:hover { transition: none; }   /* no light sweep */
-  .lens__card, .lightbox[open], .lightbox[open]::backdrop, .lightbox.is-closing, .lightbox.is-closing::backdrop { transition: none; animation: none; }
+  .gallery__item img, .lens__card, .lightbox[open], .lightbox[open]::backdrop, .lightbox.is-closing, .lightbox.is-closing::backdrop { transition: none; animation: none; }
   .reveal-ready .rv { opacity: 1; transform: none; transition: none; }
 }

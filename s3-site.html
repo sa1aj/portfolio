@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-  <link rel="stylesheet" href="css/style.css?v=56">
+  <link rel="stylesheet" href="css/style.css?v=58">
   <script>
     (function () { try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {} var m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = document.documentElement.dataset.theme === "light" ? "#f3f1ec" : "#070707"; })();
   </script>
@@ -96,7 +96,7 @@
             <a href="assets/projects/s3-site/static-website.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/static-website.jpg" alt="The live site, served through CloudFront" width="1600" height="925" loading="lazy" decoding="async"></a>
             <figcaption class="label">The live site, served through CloudFront</figcaption>
           </figure>
-          <figure class="gallery__item gallery__item--wide">
+          <figure class="gallery__item gallery__item--wide" style="--focus: 0%">
             <a href="assets/projects/s3-site/block-public-access.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/block-public-access.jpg" alt="S3 Block Public Access: all public access blocked" width="1600" height="280" loading="lazy" decoding="async"></a>
             <figcaption class="label">S3 Block Public Access: all public access blocked</figcaption>
           </figure>
@@ -104,11 +104,11 @@
             <a href="assets/projects/s3-site/IAM-user-least-privileges.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/IAM-user-least-privileges.jpg" alt="Custom least-privilege IAM policy" width="1600" height="889" loading="lazy" decoding="async"></a>
             <figcaption class="label">Custom least-privilege IAM policy</figcaption>
           </figure>
-          <figure class="gallery__item gallery__item--wide">
+          <figure class="gallery__item gallery__item--wide" style="--focus: 0%">
             <a href="assets/projects/s3-site/denied-dueto-privileges.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/denied-dueto-privileges.jpg" alt="An out-of-scope action, denied" width="1600" height="317" loading="lazy" decoding="async"></a>
             <figcaption class="label">An out-of-scope action, denied</figcaption>
           </figure>
-          <figure class="gallery__item gallery__item--wide">
+          <figure class="gallery__item gallery__item--wide" style="--focus: 22%">
             <a href="assets/projects/s3-site/working-guardduty-event.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/working-guardduty-event.jpg" alt="GuardDuty finding: root credential usage" width="1600" height="294" loading="lazy" decoding="async"></a>
             <figcaption class="label">GuardDuty finding: root credential usage</figcaption>
           </figure>
@@ -116,7 +116,7 @@
             <a href="assets/projects/s3-site/eventbridge-rule.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/eventbridge-rule.jpg" alt="EventBridge rule sending GuardDuty findings to SNS" width="1600" height="700" loading="lazy" decoding="async"></a>
             <figcaption class="label">EventBridge rule sending GuardDuty findings to SNS</figcaption>
           </figure>
-          <figure class="gallery__item gallery__item--wide">
+          <figure class="gallery__item gallery__item--wide" style="--focus: 14%">
             <a href="assets/projects/s3-site/working-cloudtrail-log.jpg" target="_blank" rel="noopener"><img src="assets/projects/s3-site/working-cloudtrail-log.jpg" alt="CloudTrail event history" width="1600" height="256" loading="lazy" decoding="async"></a>
             <figcaption class="label">CloudTrail event history</figcaption>
           </figure>
@@ -162,7 +162,7 @@
   </section>
 
   <script src="js/terminal.js?v=8" defer></script>
-  <script src="js/project.js?v=19" defer></script>
+  <script src="js/project.js?v=21" defer></script>
   <script src="js/reveal.js?v=7" defer></script>
 </body>
 </html>

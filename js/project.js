@@ -48,3 +48,55 @@
     });
   });
 })();
+
+/* Gallery viewer: clicking a shot opens it large in the same dialog style as the
+ * home page's photo viewer. Arrows (buttons or keys) step through, Esc / x / a
+ * click outside closes. Without JS the links still open the image. */
+(function () {
+  "use strict";
+  var links = Array.prototype.slice.call(document.querySelectorAll(".gallery__item a"));
+  if (!links.length || typeof HTMLDialogElement === "undefined") return;
+  var box = document.createElement("dialog");
+  box.className = "lightbox"; box.setAttribute("aria-label", "Screenshot viewer"); box.tabIndex = -1;
+  box.innerHTML = '<button class="lightbox__btn lightbox__close" type="button" data-act="close" aria-label="Close">&times;</button>' +
+    (links.length > 1 ? '<button class="lightbox__btn lightbox__prev" type="button" data-act="prev" aria-label="Previous">&larr;</button>' +
+                        '<button class="lightbox__btn lightbox__next" type="button" data-act="next" aria-label="Next">&rarr;</button>' : "") +
+    '<figure class="lightbox__fig"><img class="lightbox__img" alt=""><figcaption class="label lightbox__cap"></figcaption></figure>';
+  document.body.appendChild(box);
+  var img = box.querySelector("img"), cap = box.querySelector("figcaption"), current = 0;
+  // mark very wide screenshots so CSS can show a close-up crop in the card
+  links.forEach(function (a) {
+    var t = a.querySelector("img"); if (!t) return;
+    var mark = function () { if (t.naturalWidth && t.naturalHeight / t.naturalWidth < 0.45) a.parentNode.classList.add("is-strip"); };
+    if (t.complete) mark(); else t.addEventListener("load", mark);
+  });
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function show(i) {
+    current = (i + links.length) % links.length;
+    var a = links[current], thumb = a.querySelector("img"), fc = a.parentNode.querySelector("figcaption");
+    img.src = a.getAttribute("href"); img.alt = thumb ? thumb.alt : "";
+    cap.textContent = pad(current + 1) + " / " + pad(links.length) + (fc ? " · " + fc.textContent : "");
+  }
+  function close() { box.close(); }
+  links.forEach(function (a, i) {
+    a.removeAttribute("target");
+    a.addEventListener("click", function (e) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;   // let new-tab clicks through
+      e.preventDefault(); show(i); box.showModal(); box.focus();
+      document.documentElement.classList.add("lightbox-open");
+    });
+  });
+  box.addEventListener("close", function () {
+    document.documentElement.classList.remove("lightbox-open");
+    links[current].focus({ preventScroll: true });
+  });
+  box.addEventListener("click", function (e) {
+    var act = e.target.closest("[data-act]");
+    if (act) { var k = act.dataset.act; if (k === "close") close(); else show(current + (k === "next" ? 1 : -1)); return; }
+    if (e.target !== img) close();
+  });
+  box.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight" && links.length > 1) { e.preventDefault(); show(current + 1); }
+    else if (e.key === "ArrowLeft" && links.length > 1) { e.preventDefault(); show(current - 1); }
+  });
+})();
