@@ -576,19 +576,58 @@ a.work__row:focus-visible { outline-offset: -2px; }
   .stack__row { grid-template-columns: 1fr; gap: .35rem; }
 }
 
-/* Contact / footer */
-.contact { text-align: center; padding: clamp(7rem, 14vw, 11rem) 0 2.5rem; }
-.contact__h { font-size: clamp(3rem, 7.5vw, 7.2rem); }
-.contact__links {
-  display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem 4rem;
-  margin: clamp(3rem, 6vw, 4.5rem) 0 clamp(5rem, 10vw, 8rem);
+/* Contact / footer: lead line, big serif email (mailto) with a copy button,
+   round icon links, a base line, then a huge name fading out at the bottom.
+   The hero's line field drifts behind it all (js/footer.js) and over the name. */
+.contact { position: relative; overflow: hidden; text-align: center; padding: clamp(6rem, 12vw, 9rem) 0 0; }
+.contact__lines { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 16%, #000 100%);
+          mask-image: linear-gradient(to bottom, transparent 0%, #000 16%, #000 100%); }
+.contact__inner { position: relative; z-index: 2; display: grid; justify-items: center; }
+.contact__lead { margin: 0 0 clamp(1rem, 2.4vw, 1.8rem); font: italic 400 clamp(1.2rem, 2.2vw, 1.8rem) var(--serif); color: var(--muted); }
+.contact__email {
+  font: 400 clamp(2rem, 7.6vw, 8.4rem)/1 var(--serif); letter-spacing: -.035em;
+  color: var(--text); text-decoration: none; white-space: nowrap;
+  transition: color .3s ease;
 }
-.contact__links a {
-  font: 600 .82rem var(--mono); letter-spacing: .14em; text-transform: uppercase; text-decoration: none;
+.contact__email:hover { color: transparent; background: var(--chrome-text); -webkit-background-clip: text; background-clip: text; }
+/* Bodoni's 1 looks like an l at this size; set the digit in the sans so the address reads right */
+.contact__digit { font-family: var(--sans); font-weight: 300; font-size: .86em; letter-spacing: 0; margin: 0 .02em; }
+.contact__copy {
+  display: inline-flex; align-items: center; gap: .5rem; margin-top: clamp(1.4rem, 2.6vw, 2.2rem);
+  padding: .5rem .9rem; border: 1px solid transparent; border-radius: 999px; background: none;
+  color: var(--muted); cursor: pointer; transition: color .25s ease, border-color .25s ease;
 }
-.contact__links a:hover { text-decoration: underline; text-underline-offset: 6px; }
-.contact__base { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .75rem; font-size: .6rem; color: var(--dim); }
-@media (max-width: 600px) { .contact__base { justify-content: center; } }
+.contact__copy:hover { color: var(--text); border-color: var(--border-strong); }
+.contact__copy.is-copied { color: var(--text); }
+.contact__icons { display: flex; justify-content: center; gap: .9rem; margin: clamp(3rem, 6vw, 5rem) 0 clamp(4rem, 8vw, 6.5rem); }
+.contact__icons a {
+  display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%;
+  border: 1px solid var(--border-strong); color: var(--muted);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  transition: color .3s ease, border-color .3s ease, scale .45s cubic-bezier(.22, 1, .36, 1);
+}
+.contact__icons a:hover { color: var(--text); border-color: color-mix(in srgb, var(--text) 50%, transparent); }
+@media (hover: hover) { .contact__icons a:hover { scale: 1.06; } }
+.contact__base {
+  width: 100%; display: flex; justify-content: space-between; flex-wrap: wrap; gap: .75rem 2rem;
+  font-size: .78rem; color: var(--dim);
+}
+.contact__copyright { font: 400 .95rem var(--serif); color: var(--muted); }
+.contact__base kbd { font-size: .7rem; }
+/* the giant name: a chrome fade that dissolves into the page, cut off at the bottom */
+.contact__name {
+  position: relative; z-index: 0; margin: clamp(1.5rem, 4vw, 3rem) 0 0;
+  font: 400 clamp(4rem, 17.5vw, 22rem)/.8 var(--serif); letter-spacing: -.045em; white-space: nowrap;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--text) 80%, transparent) 0%, color-mix(in srgb, var(--text) 35%, transparent) 55%, transparent 92%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  margin-bottom: -.08em; user-select: none;
+}
+@media (max-width: 600px) {
+  .contact__base { justify-content: center; text-align: center; }
+  .contact__icons a { width: 48px; height: 48px; }
+  .contact__email { font-size: 7.1vw; }
+}
 
 /* used by the terminal's `goto` command */
 .flash { animation: flash 1.2s ease; }
