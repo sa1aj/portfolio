@@ -120,21 +120,21 @@
   }
   function moveTitle(k) {
     if (!letters.length) return;
-    var R = fs * 1.6, R2 = R * R, amp = fs * 0.028, push = fs * 0.2;
+    var R = fs * 1.3, R2 = R * R, amp = fs * 0.016, push = fs * 0.1;
     for (var i = 0; i < letters.length; i++) {
       var L = letters[i];
       // resting swell: a slow wave running along the line
       var tx = 0, ty = amp * Math.sin(L.cx * 0.011 - t * 1.3) + amp * 0.5 * Math.sin(L.cx * 0.023 + t * 0.9 + L.cy * 0.01);
-      var tr = 1.6 * Math.sin(L.cx * 0.008 - t * 1.1 + 1.2), ts = 1;
+      var tr = 0.8 * Math.sin(L.cx * 0.008 - t * 1.1 + 1.2), ts = 1;
       if (pointer.inside) {                                  // nudged away from the cursor
         var dx = L.cx - pointer.x, dy = L.cy - pointer.y, d2 = dx * dx + dy * dy;
         if (d2 < R2) {
           var d = Math.sqrt(d2) + 1, f = 1 - d2 / R2; f *= f;
           tx += dx / d * push * f; ty += dy / d * push * f;
-          tr += (dx < 0 ? -1 : 1) * 6 * f; ts += 0.05 * f;
+          tr += (dx < 0 ? -1 : 1) * 3 * f; ts += 0.025 * f;
         }
       }
-      var e = 0.12 * k;                                      // ease toward the target: a soft, watery lag
+      var e = 0.09 * k;                                      // ease toward the target: a soft, watery lag
       L.x += (tx - L.x) * e; L.y += (ty - L.y) * e; L.r += (tr - L.r) * e; L.s += (ts - L.s) * e;
       L.el.style.transform = "translate(" + L.x.toFixed(1) + "px," + L.y.toFixed(1) + "px) rotate(" + L.r.toFixed(2) + "deg) scale(" + L.s.toFixed(3) + ")";
     }
