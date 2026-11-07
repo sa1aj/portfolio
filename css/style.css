@@ -825,8 +825,9 @@ a.work__row:focus-visible { outline-offset: -2px; }
    uniform card: show a readable close-up instead, focused by --focus (x
    position, set per figure); the viewer still shows the whole thing. */
 .gallery__item.is-strip img { object-fit: cover; object-position: var(--focus, 0%) 0; border-radius: 8px; }
-/* Tall phone screenshots: a close-up of the top of the screen (the whole thing is in the viewer). */
-.gallery__item.is-tall img { object-fit: cover; object-position: 50% 0; border-radius: 10px; }
+/* Tall phone screenshots get a taller card and show in full (they sit in pairs). */
+.gallery__item.is-tall a { aspect-ratio: 3 / 4; }
+.gallery__item--full { grid-column: 1 / -1; }
 .gallery__item a:hover { border-color: color-mix(in srgb, var(--text) 28%, transparent); }
 @media (hover: hover) { .gallery__item a:hover img { scale: 1.025; } }
 .gallery__item figcaption {
