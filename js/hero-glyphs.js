@@ -45,7 +45,7 @@
     "#$%&@01"          // 5 foam
   ];
   var W = 0, H = 0, cw = 11, ch = 18, cols = 0, rows = 0;
-  var rgb = "255,255,255", baseA = 0.9;
+  var rgb = "255,255,255", baseA = 0.9, plum = [];
   var t = 0, last = 0, running = false, raf = 0, inView = true;
   var seeds = [];                 // per-cell random, so calm glyphs stay put
   var title = { x: 0, y: 0, rx: 1, ry: 1 };
@@ -58,7 +58,14 @@
 
   function readTheme() {
     var light = document.documentElement.dataset.theme === "light";
-    rgb = light ? "18,18,18" : "243,241,238";
+    // the old orb's palette: pink-lavender haze in calm water, brightening toward
+    // pale lilac in the foam (dark theme); deep plum shades on cream (light theme)
+    var lo = light ? [150, 92, 140] : [128, 76, 122], hi = light ? [78, 30, 70] : [226, 176, 218];
+    for (var s = 0; s < 6; s++) {
+      var q = s / 5;
+      plum[s] = Math.round(lo[0] + (hi[0] - lo[0]) * q) + "," + Math.round(lo[1] + (hi[1] - lo[1]) * q) + "," + Math.round(lo[2] + (hi[2] - lo[2]) * q);
+    }
+    rgb = plum[5];
     baseA = light ? 0.85 : 0.95;
   }
   function resize() {
@@ -306,7 +313,7 @@
         var e2 = ex * ex + ey * ey, hush = e2 < 1 ? 0.15 + 0.85 * e2 * e2 : 1;
         var a = baseA * edge * hush * (0.16 + 0.84 * Math.pow(I, 1.4));
         if (a < 0.06) continue;
-        ctx.fillStyle = "rgba(" + rgb + "," + a.toFixed(3) + ")";
+        ctx.fillStyle = "rgba(" + plum[lvl] + "," + a.toFixed(3) + ")";
         ctx.fillText(g, x, gy);
       }
     }
