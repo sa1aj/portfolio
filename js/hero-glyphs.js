@@ -7,11 +7,14 @@
  * - Where lines bunch up or cross (the local spacing collapses) and on passing
  *   crests, the water is "foamy": glyphs brighten and turn into dense symbols
  *   that flicker. Calm stretches are faint dots and dashes.
- * - The cursor is a ball moving through the water: a smooth dent where it sits,
- *   and a Kelvin-style V wake behind it. The wake is built the way a real one
- *   is: points along the cursor's path each emit a circular wavelet that
- *   spreads slower than the cursor moves, and their envelope forms the V.
- *   Clicking (or tapping) drops a ring ripple that spreads and fades.
+ * - The cursor is a boat: it leaves a Kelvin wake. For each glyph near the
+ *   cursor's recent path we find how far back along the path it is (s) and how
+ *   far to the side (n). Two arms open at the Kelvin angle (|n| = 0.354 s,
+ *   about 19.5 degrees), each made of a few long streaks fanning at slightly
+ *   smaller angles (the feathered lines in a real wake), plus a churned strip
+ *   down the middle just behind the cursor. It fades with distance and, when
+ *   the cursor stops, fades out. It follows the path, so turns bend it.
+ * - Clicking (or tapping) drops a ring ripple that spreads and fades.
  *   (Cost control: only glyphs inside the effects' bounding box are tested.)
  * - Glyphs dim behind the headline so it stays readable.
  * - Only animates while the hero is on screen; reduced motion = one still frame.
@@ -40,10 +43,10 @@
   var seeds = [];                 // per-cell random, so calm glyphs stay put
   var title = { x: 0, y: 0, rx: 1, ry: 1 };
   var pointer = { x: 0, y: 0, inside: false };
-  var ball = { x: 0, y: 0, s: 0 };   // eases after the pointer; s = presence 0..1
-  var trail = [];                     // wake emitters: { x, y, t, amp }
+  var path = [];                      // cursor's recent path, oldest first: { x, y, t, amp }
   var ripples = [];                   // click ripples: { x, y, t }
-  var WAKE_C = 110, WAKE_LIFE = 1.8;  // wavelet speed (px/s) and lifetime (s)
+  var WAKE_LIFE = 2.0;                // seconds a path point keeps feeding the wake
+  var KELVIN = 0.354;                 // tan(19.47 deg): the Kelvin wake half-angle
   var RIP_C = 260, RIP_LIFE = 2.6;
   var lastMove = { x: 0, y: 0, at: 0 };
 
@@ -86,59 +89,104 @@
   }
 
   // The cursor's effect at a glyph's position: { ox, oy } push and extra foam.
-  // Rings (wake wavelets + click ripples) are prepared once per frame in
-  // prepRings(); glyphs outside their combined bounding box skip all of this.
-  var dist = { ox: 0, oy: 0, foam: 0 };
-  var rings = [], nRings = 0, box = { x0: 0, y0: 0, x1: -1, y1: -1 };
-  function addRing(cx, cy, r, w, amp, push, glow) {
-    if (amp < 0.03) return;
-    var lim = r + 3 * w, inner = Math.max(0, r - 3 * w);
-    var o = rings[nRings] || (rings[nRings] = {});
-    o.cx = cx; o.cy = cy; o.r = r; o.w = w; o.amp = amp; o.push = push; o.glow = glow;
-    o.lim2 = lim * lim; o.in2 = inner * inner; nRings++;
-    if (cx - lim < box.x0) box.x0 = cx - lim; if (cx + lim > box.x1) box.x1 = cx + lim;
-    if (cy - lim < box.y0) box.y0 = cy - lim; if (cy + lim > box.y1) box.y1 = cy + lim;
+  // Prepared once per frame; glyphs outside the combined bounding box skip it.
+  var dist = { ox: 0, oy: 0, foam: 0, calm: 0 };   // calm: how much to settle the sea here (inside a wake)
+  var box = { x0: 0, y0: 0, x1: -1, y1: -1 };
+  function grow(x0, y0, x1, y1) {
+    if (x0 < box.x0) box.x0 = x0; if (x1 > box.x1) box.x1 = x1;
+    if (y0 < box.y0) box.y0 = y0; if (y1 > box.y1) box.y1 = y1;
   }
-  function prepRings() {
-    nRings = 0; box.x0 = box.y0 = Infinity; box.x1 = box.y1 = -Infinity;
-    for (var i = 0; i < trail.length; i++) {             // the wake
-      var p = trail[i], age = t - p.t, f = 1 - age / WAKE_LIFE;
-      addRing(p.x, p.y, WAKE_C * age, 8 + age * 16, f * f * p.amp, 9, 0.55);
-    }
-    for (var j = 0; j < ripples.length; j++) {           // click ripples
-      var q = ripples[j], qa = t - q.t, g = 1 - qa / RIP_LIFE;
-      addRing(q.x, q.y, RIP_C * qa, 10 + qa * 12, g * g, 22, 0.9);
-    }
-    if (ball.s > 0.01) {                                   // the ball's reach
-      if (ball.x - 80 < box.x0) box.x0 = ball.x - 80; if (ball.x + 80 > box.x1) box.x1 = ball.x + 80;
-      if (ball.y - 80 < box.y0) box.y0 = ball.y - 80; if (ball.y + 80 > box.y1) box.y1 = ball.y + 80;
+
+  // Click ripples: rings.
+  var rings = [], nRings = 0;
+  function prepRipples() {
+    nRings = 0;
+    for (var j = 0; j < ripples.length; j++) {
+      var q = ripples[j], qa = t - q.t, g = 1 - qa / RIP_LIFE, amp = g * g;
+      if (amp < 0.03) continue;
+      var r = RIP_C * qa, w = 10 + qa * 12, lim = r + 3 * w, inner = Math.max(0, r - 3 * w);
+      var o = rings[nRings] || (rings[nRings] = {});
+      o.cx = q.x; o.cy = q.y; o.r = r; o.w = w; o.amp = amp; o.lim2 = lim * lim; o.in2 = inner * inner; nRings++;
+      grow(q.x - lim, q.y - lim, q.x + lim, q.y + lim);
     }
   }
-  function disturb(x, y) {
-    dist.ox = 0; dist.oy = 0; dist.foam = 0;
-    for (var i = 0; i < nRings; i++) {
-      var o = rings[i], dx = x - o.cx, dy = y - o.cy, d2 = dx * dx + dy * dy;
-      if (d2 > o.lim2 || d2 < o.in2) continue;           // outside this ring's band: no sqrt needed
-      var d = Math.sqrt(d2), u = (d - o.r) / o.w;
-      var wv = Math.cos(u * 2.2) * Math.exp(-u * u) * o.amp, inv = 1 / (d + 1);
-      dist.ox += wv * o.push * dx * inv; dist.oy += wv * o.push * dy * inv;
-      dist.foam += Math.abs(wv) * o.glow;
+
+  // The wake: path segments from the cursor backwards, with distance-along-path.
+  var segs = [], nSegs = 0;
+  function prepWake() {
+    nSegs = 0;
+    if (!path.length) return;
+    var pts = path.slice();
+    if (pointer.inside) pts.push({ x: pointer.x, y: pointer.y, t: t, amp: path[path.length - 1].amp });
+    var s = 0, minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (var i = pts.length - 1; i > 0; i--) {             // newest -> oldest
+      var A = pts[i], B = pts[i - 1], dx = B.x - A.x, dy = B.y - A.y, len = Math.sqrt(dx * dx + dy * dy);
+      if (len < 0.5) continue;
+      var fa = Math.max(0, 1 - (t - A.t) / WAKE_LIFE), fb = Math.max(0, 1 - (t - B.t) / WAKE_LIFE);
+      var o = segs[nSegs] || (segs[nSegs] = {});
+      o.ax = A.x; o.ay = A.y; o.ux = dx / len; o.uy = dy / len; o.len = len; o.s0 = s;
+      o.ka = A.amp * Math.pow(fa, 1.4); o.kb = B.amp * Math.pow(fb, 1.4); o.last = i === 1;
+      nSegs++; s += len;
+      minX = Math.min(minX, A.x, B.x); maxX = Math.max(maxX, A.x, B.x);
+      minY = Math.min(minY, A.y, B.y); maxY = Math.max(maxY, A.y, B.y);
     }
-    if (ball.s > 0.01) {                                   // the ball: a smooth dent with a foamy rim
-      var bx = x - ball.x, by = (y - ball.y) * 0.9, R = 70, b2 = (bx * bx + by * by) / (R * R);
-      if (b2 < 1) {
-        var k = 1 - b2; k *= k;
-        dist.ox += bx * 0.7 * k * ball.s; dist.oy += by * 0.45 * k * ball.s;
-        dist.foam += k * (1 - k) * 1.4 * ball.s;
+    if (!nSegs) return;
+    var reach = KELVIN * s + 30;
+    grow(minX - reach, minY - reach, maxX + reach, maxY + reach);
+  }
+  var STREAKS = [KELVIN, 0.3, 0.25, 0.19], STREAK_W = [1, 0.7, 0.55, 0.4];
+  function wakeAt(x, y) {
+    var best = Infinity, bs = 0, bn = 0, bk = 0, bux = 0, buy = 0;
+    for (var i = 0; i < nSegs; i++) {
+      var o = segs[i], px = x - o.ax, py = y - o.ay;
+      var along = px * o.ux + py * o.uy;
+      if (along < 0) continue;                               // ahead of this part of the path: no wake
+      var tt = along / o.len;
+      if (tt > 1) { if (o.last) continue; tt = 1; }          // behind the tail: no wake
+      if (tt < 0) tt = 0;
+      var qx = px - o.ux * o.len * tt, qy = py - o.uy * o.len * tt, d2 = qx * qx + qy * qy;
+      if (d2 < best) {
+        best = d2; bs = o.s0 + o.len * tt; bn = o.ux * py - o.uy * px;   // signed side distance
+        bk = o.ka + (o.kb - o.ka) * tt; bux = o.ux; buy = o.uy;
       }
     }
+    if (best === Infinity || bk < 0.02 || bs < 4) return;
+    var an = Math.abs(bn), w = 5 + bs * 0.02;
+    if (an > KELVIN * bs + 3 * w + 6) return;                // outside the V
+    var arms = 0;
+    for (var k = 0; k < STREAKS.length; k++) {
+      var r = (an - STREAKS[k] * bs) / w;
+      arms += STREAK_W[k] * Math.exp(-r * r);
+    }
+    var cw2 = 4 + bs * 0.05, cen = Math.exp(-(an * an) / (cw2 * cw2)) * Math.exp(-bs / 150);
+    var v = (arms * 1.2 * Math.min(1, bs / 30) + cen * 0.9) * Math.exp(-bs / 650) * bk;
+    var side = bn < 0 ? -1 : 1;                               // push glyphs away from the centre line
+    dist.ox += -buy * side * v * 5; dist.oy += bux * side * v * 5;
+    dist.foam += v;
+    // inside the V the water is calmer than the chop around it, so the arms stand out
+    var inside = Math.max(0, Math.min(1, (KELVIN * bs - an) / (w * 2)));
+    dist.calm = Math.max(dist.calm, inside * Math.min(1, bk * 1.4) * Math.exp(-bs / 600) * Math.min(1, bs / 25) * 0.75);
+  }
+
+  function disturb(x, y) {
+    dist.ox = 0; dist.oy = 0; dist.foam = 0; dist.calm = 0;
+    for (var i = 0; i < nRings; i++) {
+      var o = rings[i], dx = x - o.cx, dy = y - o.cy, d2 = dx * dx + dy * dy;
+      if (d2 > o.lim2 || d2 < o.in2) continue;               // outside this ring's band: no sqrt needed
+      var d = Math.sqrt(d2), u = (d - o.r) / o.w;
+      var wv = Math.cos(u * 2.2) * Math.exp(-u * u) * o.amp, inv = 1 / (d + 1);
+      dist.ox += wv * 22 * dx * inv; dist.oy += wv * 22 * dy * inv;
+      dist.foam += Math.abs(wv) * 0.9;
+    }
+    if (nSegs) wakeAt(x, y);
   }
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
     var tick = Math.floor(t * 12);   // foam re-rolls its symbols ~12x a second
-    var busy = ball.s > 0.01 || trail.length > 0 || ripples.length > 0;
-    if (busy) prepRings();
+    box.x0 = box.y0 = Infinity; box.x1 = box.y1 = -Infinity;
+    prepRipples(); prepWake();
+    var busy = nRings > 0 || nSegs > 0;
     var gap = cw * 1.35;             // resting distance between lines
     var n = Math.ceil(W / gap) + 8;
     for (var li = 0; li < n; li++) {
@@ -157,7 +205,8 @@
         var gy = y;
         var near = busy && x > box.x0 && x < box.x1 && y > box.y0 && y < box.y1;
         if (near) { disturb(x, y); x += dist.ox; gy += dist.oy; }
-        var I = Math.min(1, 0.12 + bunch + wave + (near ? dist.foam : 0));
+        var sea = 0.12 + bunch + wave;
+        var I = near ? Math.min(1, sea * (1 - dist.calm) + dist.foam) : Math.min(1, sea);
         var lvl = I < 0.2 ? 0 : I < 0.32 ? 1 : I < 0.46 ? 2 : I < 0.6 ? 3 : I < 0.78 ? 4 : 5;
         var set = RAMP[lvl], idx = (li * rows + r) % seeds.length;
         var pick = lvl === 5 ? (seeds[idx] * 97 + tick) | 0 : (seeds[idx] * 31) | 0;
@@ -177,9 +226,7 @@
     var dt = last ? Math.min(now - last, 100) : 16.7;
     last = now; t += dt / 1000;
     var k = Math.min(1, dt / 16.7);
-    if (pointer.inside) { ball.x += (pointer.x - ball.x) * 0.25 * k; ball.y += (pointer.y - ball.y) * 0.25 * k; }
-    ball.s += ((pointer.inside ? 1 : 0) - ball.s) * (pointer.inside ? 0.08 : 0.04) * k;
-    while (trail.length && t - trail[0].t > WAKE_LIFE) trail.shift();
+    while (path.length && t - path[0].t > WAKE_LIFE) path.shift();
     while (ripples.length && t - ripples[0].t > RIP_LIFE) ripples.shift();
     draw();
     if (running) raf = requestAnimationFrame(frame);
@@ -195,14 +242,13 @@
     var r = hero.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
     pointer.inside = x >= 0 && y >= 0 && x <= r.width && y <= r.height;
     if (!pointer.inside) return;
-    if (ball.s < 0.02) { ball.x = x; ball.y = y; }
     pointer.x = x; pointer.y = y;
-    // drop a wake emitter every ~14px of travel; faster moves make a stronger wake
+    // record the path every ~12px; faster moves make a stronger wake
     var now = performance.now(), mx = x - lastMove.x, my = y - lastMove.y, moved = Math.sqrt(mx * mx + my * my);
-    if (moved >= 20) {
+    if (moved >= 12 || !path.length) {
       var speed = moved / Math.max(8, now - lastMove.at) * 1000;          // px/s
-      trail.push({ x: x, y: y, t: t, amp: Math.max(0.25, Math.min(1, speed / 700)) });
-      if (trail.length > 24) trail.shift();
+      path.push({ x: x, y: y, t: t, amp: Math.max(0.3, Math.min(1, speed / 600)) });
+      if (path.length > 70) path.shift();
       lastMove.x = x; lastMove.y = y; lastMove.at = now;
     }
   }, { passive: true });
